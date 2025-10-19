@@ -53,7 +53,7 @@ exports.deleteAutor = async (req, res) => {
 };
 
 exports.updateAutor = async (req, res, next) => {
-    const { rg } = req.query;
+    const { rg } = req.query; //?rg=
 
     const camposPermitidos = ['nome', 'endereco'];
     const campos = [];
