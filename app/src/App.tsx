@@ -1,33 +1,65 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { BrowserRouter, Route, Routes } from 'react-router'
+import Home from './Routes/Home'
+import { createTheme, ThemeProvider } from '@mui/material'
+
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#ad3636',
+      contrastText: '#ffffff',
+    },
+    secondary: {
+      main: '#e47272',
+      contrastText: '#ffffff',
+    },
+    background: {
+      default: '#251f1f',
+      paper: '#2d2626', // um leve contraste pro card/paper
+    },
+    text: {
+      primary: '#ffffff',
+      secondary: '#e0d5d5',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h1: { fontWeight: 700 },
+    h2: { fontWeight: 600 },
+    button: { textTransform: 'none', fontWeight: 500 },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+          padding: '8px 20px',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          borderRadius: 12,
+        },
+      },
+    },
+  },
+});
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + Reactassaaaasa</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <Routes>
+          <Route path={"/"} element={<Home />} />
+        </Routes>
+      </ThemeProvider>
+      </BrowserRouter>
     </>
   )
 }

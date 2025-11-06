@@ -1,0 +1,28 @@
+.bg {
+    flex: 1;
+            background: url(./assets/lanhouse.jpg);
+        background-position: center;
+        filter: blur(2px);
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.1;
+}
+
+.login {
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    padding: 2% 20px;
+    background-color: rgba(20, 20, 20, 0.776);
+    backdrop-filter: blur(4px);
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+
+}
