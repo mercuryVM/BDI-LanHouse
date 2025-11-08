@@ -5,16 +5,17 @@ const SessionManager = require('../sessions');
 exports.login = async (req, res) => {
     const { username, password } = req.body;
     const { rows } = await db.query(
-        "SELECT cpf, loginAcesso, senhaAcesso FROM cliente WHERE loginAcesso = $1",
+        "SELECT cpf, loginacesso, senhaacesso FROM cliente WHERE loginacesso = $1",
         [username]
     );
     let user = rows[0];
 
     if (!user) {
-        const funcRows = await db.query(
-            "SELECT cpf, senhaAcesso FROM funcionario WHERE cpf = $1",
+        const funcResponse = await db.query(
+            "SELECT cpf, senhaacesso FROM CLT WHERE cpf = $1",
             [username]
         );
+        const funcRows = funcResponse.rows;
         user = funcRows[0];
         if (!user) {
             return res.status(404).send({
@@ -24,9 +25,9 @@ exports.login = async (req, res) => {
         }
     }
 
-    const validPassword = await argon2.verify(user.senhaAcesso, password);
+    const validPassword = await argon2.verify(user.senhaacesso, password);
 
-     const token = SessionManager.createSession(user.loginAcesso ? 'cliente' : 'funcionario', user.cpf);
+    const token = SessionManager.createSession(user.loginacesso ? 'cliente' : 'funcionario', user.cpf);
 
     if (!validPassword) {
         return res.status(401).send({
