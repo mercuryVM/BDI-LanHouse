@@ -204,9 +204,21 @@ function Sidebar({ userData }: UserDataProps) {
             <h2>Seu saldo</h2>
 
             <div className={styles.plataforms}>
-                {userData?.minutos_plataformas?.map((plataforma, index) => (
-                    <PlataformaHoras key={index} plataforma={plataforma} />
-                ))}
+                <PlataformaHoras plataforma={{
+                    nome: 'Computador',
+                    tipo: 0,
+                    minutos: userData?.tempoComputador || 0
+                }} />
+                <PlataformaHoras plataforma={{
+                    nome: 'Console',
+                    tipo: 1,
+                    minutos: userData?.tempoConsole || 0
+                }} />
+                <PlataformaHoras plataforma={{
+                    nome: 'Simulador',
+                    tipo: 2,
+                    minutos: userData?.tempoSimulador || 0
+                }} />
             </div>
 
             <div className={styles.sidebarBottom}>

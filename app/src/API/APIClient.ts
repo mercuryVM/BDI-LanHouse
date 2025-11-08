@@ -6,7 +6,9 @@ export interface UserData {
     vip: boolean;
     data_hora_fim_vip: Date | null;
     role: 'clt' | 'cliente';
-    minutos_plataformas?: PlataformasMinutos[];
+    tempoSimulador?: number;
+    tempoConsole?: number;
+    tempoComputador?: number;
 }
 
 export interface PlataformasMinutos {
@@ -99,9 +101,9 @@ export default class APIClient {
         return new Error(error.message || 'Unknown error occurred');
     }
 
-    async login(username: string, password: string): Promise<any> {
+    async login(username: string, password: string): Promise<string> {
         try {
-            const result = await this.post('/login', { username, password });
+            const result = await this.post<string>('/login', { username, password });
             return result;
         } catch (error) {
             console.error('Login failed:', error);
