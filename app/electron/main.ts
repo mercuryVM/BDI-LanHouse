@@ -6,19 +6,7 @@ import isDev from 'electron-is-dev';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Enable hot reload for Electron main process in dev mode
-if (isDev) {
-    try {
-        const electronReloader = await import('electron-reloader');
-        electronReloader.default(module, {
-            watchRenderer: false // Vite handles the renderer process
-        });
-    } catch (err) {
-        console.log('Error loading electron-reloader:', err);
-    }
-}
-
-let mainWindow;
+let mainWindow: BrowserWindow | null;
 
 function createWindow () {
     mainWindow = new BrowserWindow({
@@ -28,8 +16,8 @@ function createWindow () {
             preload: path.join(__dirname, '../electron/preload.js'),
             nodeIntegration: false,
             contextIsolation: true,
-            enableRemoteModule: false,
-        }
+        },
+        title: "Arena Gamer"
     });
     
     
@@ -38,14 +26,6 @@ function createWindow () {
         mainWindow.webContents.openDevTools(); // Open DevTools in dev mode
     } else {
         mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-    }
-    
-    // Reload the window when the renderer process crashes in dev mode
-    if (isDev) {
-        mainWindow.webContents.on('crashed', () => {
-            console.log('Renderer process crashed, reloading...');
-            mainWindow.reload();
-        });
     }
 }
 

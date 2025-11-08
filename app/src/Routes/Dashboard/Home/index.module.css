@@ -1,0 +1,101 @@
+.container {
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    min-height: 0;
+    min-width: 0;
+}
+
+.header {}
+
+.vipValidUntil {
+    font-size: 12px;
+    opacity: 0.5;
+}
+
+.gameCard {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    min-width: 175px;
+    height: 250px;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+}
+
+.gameImage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.gamesViewport {
+    overflow-x: auto;
+}
+
+.gamesGrid {
+    display: flex;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+.gameTitle {
+    font-weight: 600;
+    z-index: 1;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+}
+
+.gameCard:hover .gameImage {
+    transform: scale(1.1);
+}
+
+.gameCard:hover .gameTitle {
+    text-decoration: underline;
+}
+
+.gameCard:hover .gameImage {
+    opacity: 0.7;
+}
+
+.sidebar {
+    min-width: 400px;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.platformCard {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.platformHours {
+}
+
+.plataforms {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebarBottom {
+    margin-top: auto;
+}

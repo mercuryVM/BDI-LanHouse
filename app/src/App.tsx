@@ -3,6 +3,9 @@ import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import Home from './Routes/Home'
 import { createTheme, ThemeProvider } from '@mui/material'
+import Dashboard from './Routes/Dashboard'
+import { useClient } from './Hooks/useClient'
+import type APIClient from './API/APIClient'
 
 const theme = createTheme({
   palette: {
@@ -51,12 +54,15 @@ const theme = createTheme({
 });
 
 function App() {
+  const client: APIClient = useClient();
+
   return (
     <>
       <BrowserRouter>
       <ThemeProvider theme={theme}>
         <Routes>
-          <Route path={"/"} element={<Home />} />
+          <Route path={"/"} element={<Home client={client} />} />
+          <Route path={"/dashboard"} element={<Dashboard client={client} />} />
         </Routes>
       </ThemeProvider>
       </BrowserRouter>

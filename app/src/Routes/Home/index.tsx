@@ -1,12 +1,16 @@
 import { Box, Button, Card, Chip, CircularProgress, LinearProgress, TextField, Typography } from "@mui/material";
 import styles from "./index.module.css";
 import { useCallback, useState } from "react";
+import { useNavigate, type NavigateFunction } from "react-router";
+import type APIClient from "../../API/APIClient";
 
-export default function Home() {
+export default function Home({client}: {client: APIClient}) {
     const [error, setError] = useState<string | null>(null);
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
+
+    const navigate: NavigateFunction = useNavigate();
 
     const handleLogin = useCallback(() => {
         setError(null);
@@ -17,13 +21,22 @@ export default function Home() {
         }
 
         setLoading(true);
+
+        let response = {
+            success: true,
+            role: "user"
+        }
+
+        if (response.success) {
+            navigate("/dashboard");
+        } else {
+            setError("Usuário ou senha incorretos.");
+        }
     }, [username, password]);
 
     return (
         <div className={styles.container}>
-                        <div className={styles.bg}>
-
-            </div>
+            <div className={styles.bg} />
             <div className={styles.login}>
                 <Typography variant="h3" gutterBottom textAlign={"center"}>
                     Arena Gamer

@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "concurrently": "^9.2.1",
-    "cross-env": "^10.1.0",
-    "electron": "^39.1.0",
-    "electron-builder": "^26.0.12",
-    "electron-is-dev": "^3.0.1"
-  }
-}
