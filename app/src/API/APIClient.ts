@@ -37,13 +37,24 @@ export interface Game {
 export default class APIClient {
     client: AxiosInstance;
     userData: UserData | null = null;
+    _token: string | null = null;
+
+    set token(token: string) {
+        this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        this._token = token;
+        localStorage.setItem('api_token', token);
+    }
+
+    get token(): string | null {
+        return this._token;
+    }
 
     async getUserData(): Promise<UserData | null> {
         if (this.userData) {
             return this.userData;
         }
         try {
-            const userData = await this.get<UserData>('/user/data');
+            const userData = await this.get<UserData>('/user');
             this.userData = userData;
             return userData;
         } catch (error) {
@@ -58,6 +69,11 @@ export default class APIClient {
             timeout: 5000,
             headers: { 'Content-Type': 'application/json' }
         })
+
+        const storedToken = localStorage.getItem('api_token');
+        if (storedToken) {
+            this.token = storedToken;
+        }
     }
 
     async get<T = any>(resource: string, params: Record<string, any> = {}): Promise<T> {
@@ -103,8 +119,11 @@ export default class APIClient {
 
     async login(username: string, password: string): Promise<string> {
         try {
-            const result = await this.post<string>('/login', { username, password });
-            return result;
+            const token = await this.post<string>('/login', { username, password });
+
+            this.token = token;
+
+            return token;
         } catch (error) {
             console.error('Login failed:', error);
             throw error;
