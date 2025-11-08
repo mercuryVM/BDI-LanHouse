@@ -8,7 +8,7 @@ exports.user = async (req, res) => {
     //se userType for cliente, buscar na tabela cliente, se for funcionario, buscar na tabela funcionario mas considere retornar vip se for cliente
     const { rows } =  await db.query(
         userType === 'cliente' ?
-        "SELECT cpf, nome, vip, datahorafimvip FROM cliente WHERE cpf = $1" :
+        "SELECT cpf, nome, vip, dataHoraFimVip FROM cliente WHERE cpf = $1" :
         "SELECT cpf, nome FROM funcionario WHERE cpf = $1",
         [userId]
     );
@@ -17,14 +17,14 @@ exports.user = async (req, res) => {
     //pegar minutos de plataformas se for cliente da tabela cliente_plataformas
     if (userType === 'cliente') {
         const { rows: plataformaRows } = await db.query(
-            "SELECT tipo, cliente, plataforma, minutosdisponiveis FROM plataforma LEFT JOIN cliente_plataformas ON plataforma = nome WHERE cliente = $1", 
+            "SELECT tipo, cliente, plataforma, minutosDisponiveis FROM plataforma LEFT JOIN cliente_plataformas ON plataforma = nome WHERE cliente = $1", 
             [userId]
         );
 
         const minutosPlataformas = plataformaRows.map(row => ({
             nome: row.plataforma,
             tipo: row.tipo,
-            minutos: row.minutosdisponiveis || 0
+            minutos: row.minutosDisponiveis || 0
         }));
 
         user.minutos_plataformas = minutosPlataformas;
@@ -42,7 +42,7 @@ exports.user = async (req, res) => {
         cpf: user.cpf,
         nome: user.nome,
         vip: user.vip || null,
-        data_hora_fim_vip: user.datahorafimvip || null,
+        data_hora_fim_vip: user.dataHoraFimVip || null,
         role: userType === 'cliente' ? 'cliente' : 'clt',
         minutos_plataformas: user.minutos_plataformas || []
     };

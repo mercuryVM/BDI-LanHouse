@@ -1,16 +1,16 @@
 const db = require("../config/database");
 
 exports.createAgendamento = async (req, res) => {
-    const { id, datahorainicio, datahorafim } = req.body;
+    const { id, dataHoraInicio, dataHoraFim } = req.body;
     const { rows } = await db.query(
-        "INSERT INTO agendamento (id, horainicio, datahorafim) VALUES ($1, $2, $3)",
-        [id, datahorainicio, datahorafim]
+        "INSERT INTO agendamento (id, dataHoraInicio, dataHoraFim) VALUES ($1, $2, $3)",
+        [id, dataHoraInicio, dataHoraFim]
     );
     res.status(201).send({
         success: true,
         message: "Agendamento adicionado com sucesso!",
         data: {
-            agendamento: { id, datahorainicio, datahorafim }
+            agendamento: { id, dataHoraInicio, dataHoraFim }
         },
     });
 };
@@ -18,7 +18,7 @@ exports.createAgendamento = async (req, res) => {
 exports.getAgendamento = async (req, res) => {
     const { id } = req.query; 
     const { rows } = await db.query(
-        "SELECT rg, datahorainicio, datahorafim FROM agendamento WHERE id = $1",
+        "SELECT rg, dataHoraInicio, dataHoraFim FROM agendamento WHERE id = $1",
         [id]
     );
     const agendamento = rows[0];
