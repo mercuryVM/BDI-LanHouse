@@ -61,17 +61,44 @@ export default class APIClient {
 
     constructor() {
         this.client = axios.create({
-            baseURL: 'https://api.example.com',
+            baseURL: 'http://localhost:8080/api',
             timeout: 5000,
             headers: { 'Content-Type': 'application/json' }
         })
     }
 
     get(resource: string, params: Record<string, any> = {}) {
-        return this.client.get(resource, { params })
+        return new Promise<ApiResponse>((resolve: Function, reject: Function) => {
+            this.client.get(resource, { params })
+                .then(response => this.handleResponse(response, resolve))
+                .catch(error => this.handleError(error, reject));
+        });
+    }
+
+    handleResponse(response: any, resolve: Function): void {
+        const apiResponse: ApiResponse = response.data;
+        resolve(apiResponse);
+    }
+
+    handleError(error: any, reject: Function): void {
+        console.error('API Error:', error);
+        const apiResponse: ApiResponse = error.response ? error.response.data : {
+            success: false,
+            data: null,
+            message: 'Unknown error occurred',
+        };
+        reject(apiResponse);
     }
 
     post(resource: string, data: Record<string, any>) {
-        return this.client.post(resource, data)
+        return new Promise<ApiResponse>((resolve, reject) => {
+            this.client.post(resource, data)
+                .then(response => this.handleResponse(response, resolve))
+                .catch(error => this.handleError(error, reject));
+        });
+    }
+
+    login(username: string, password: string) {
+        return this.post('/login', { username, password });
     }
 }

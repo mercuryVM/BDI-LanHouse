@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useNavigate, type NavigateFunction } from "react-router";
 import type APIClient from "../../API/APIClient";
 
-export default function Home({client}: {client: APIClient}) {
+export default function Home({ client }: { client: APIClient }) {
     const [error, setError] = useState<string | null>(null);
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
@@ -12,7 +12,7 @@ export default function Home({client}: {client: APIClient}) {
 
     const navigate: NavigateFunction = useNavigate();
 
-    const handleLogin = useCallback(() => {
+    const handleLogin = useCallback(async () => {
         setError(null);
 
         if (!username || !password) {
@@ -22,15 +22,16 @@ export default function Home({client}: {client: APIClient}) {
 
         setLoading(true);
 
-        let response = {
-            success: true,
-            role: "user"
-        }
+        try {
+            let response = await client.login(username, password);
 
-        if (response.success) {
-            navigate("/dashboard");
-        } else {
+            if (response.success) {
+                navigate("/dashboard");
+            }
+        } catch (e) {
             setError("Usuário ou senha incorretos.");
+        } finally {
+            setLoading(false);
         }
     }, [username, password]);
 
