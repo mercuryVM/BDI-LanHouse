@@ -40,23 +40,14 @@ export default class APIClient {
         if (this.userData) {
             return this.userData;
         }
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                this.userData = {
-                    nome: "João Silva",
-                    cpf: "123.456.789-00",
-                    vip: true,
-                    data_hora_fim_vip: new Date("2024-12-31T23:59:59"),
-                    role: "cliente",
-                    minutos_plataformas: [
-                        { nome: "Computador", tipo: 0, minutos: 150 },
-                        { nome: "PlayStation", tipo: 1, minutos: 200 },
-                        { nome: "Simulador X", tipo: 2, minutos: 75 },
-                    ],
-                };
-                resolve(this.userData);
-            }, 1000);
-        });
+        try {
+            const userData = await this.get<UserData>('/user/data');
+            this.userData = userData;
+            return userData;
+        } catch (error) {
+            console.error('Failed to get user data:', error);
+            return null;
+        }
     }
 
     constructor() {
@@ -67,38 +58,116 @@ export default class APIClient {
         })
     }
 
-    get(resource: string, params: Record<string, any> = {}) {
-        return new Promise<ApiResponse>((resolve: Function, reject: Function) => {
-            this.client.get(resource, { params })
-                .then(response => this.handleResponse(response, resolve))
-                .catch(error => this.handleError(error, reject));
-        });
+    async get<T = any>(resource: string, params: Record<string, any> = {}): Promise<T> {
+        try {
+            const response = await this.client.get(resource, { params });
+            const apiResponse = this.handleResponse<T>(response);
+            if (apiResponse.success) {
+                return apiResponse.data;
+            } else {
+                throw new Error(apiResponse.message || 'Request failed');
+            }
+        } catch (error) {
+            throw this.handleError(error);
+        }
     }
 
-    handleResponse(response: any, resolve: Function): void {
-        const apiResponse: ApiResponse = response.data;
-        resolve(apiResponse);
+    async post<T = any>(resource: string, data: Record<string, any> = {}): Promise<T> {
+        try {
+            const response = await this.client.post(resource, data);
+            const apiResponse = this.handleResponse<T>(response);
+            if (apiResponse.success) {
+                return apiResponse.data;
+            } else {
+                throw new Error(apiResponse.message || 'Request failed');
+            }
+        } catch (error) {
+            throw this.handleError(error);
+        }
     }
 
-    handleError(error: any, reject: Function): void {
+    private handleResponse<T>(response: any): ApiResponse<T> {
+        return response.data as ApiResponse<T>;
+    }
+
+    private handleError(error: any): Error {
         console.error('API Error:', error);
-        const apiResponse: ApiResponse = error.response ? error.response.data : {
-            success: false,
-            data: null,
-            message: 'Unknown error occurred',
-        };
-        reject(apiResponse);
+        if (error.response?.data) {
+            const apiResponse: ApiResponse = error.response.data;
+            return new Error(apiResponse.message || 'API request failed');
+        }
+        return new Error(error.message || 'Unknown error occurred');
     }
 
-    post(resource: string, data: Record<string, any>) {
-        return new Promise<ApiResponse>((resolve, reject) => {
-            this.client.post(resource, data)
-                .then(response => this.handleResponse(response, resolve))
-                .catch(error => this.handleError(error, reject));
-        });
+    async login(username: string, password: string): Promise<any> {
+        try {
+            const result = await this.post('/login', { username, password });
+            return result;
+        } catch (error) {
+            console.error('Login failed:', error);
+            throw error;
+        }
     }
 
-    login(username: string, password: string) {
-        return this.post('/login', { username, password });
+    // Métodos utilitários para diferentes tipos de requisições
+    async put<T = any>(resource: string, data: Record<string, any> = {}): Promise<T> {
+        try {
+            const response = await this.client.put(resource, data);
+            const apiResponse = this.handleResponse<T>(response);
+            if (apiResponse.success) {
+                return apiResponse.data;
+            } else {
+                throw new Error(apiResponse.message || 'Request failed');
+            }
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async delete<T = any>(resource: string): Promise<T> {
+        try {
+            const response = await this.client.delete(resource);
+            const apiResponse = this.handleResponse<T>(response);
+            if (apiResponse.success) {
+                return apiResponse.data;
+            } else {
+                throw new Error(apiResponse.message || 'Request failed');
+            }
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    // Método para fazer requisições que retornam o ApiResponse completo
+    async getRaw<T = any>(resource: string, params: Record<string, any> = {}): Promise<ApiResponse<T>> {
+        try {
+            const response = await this.client.get(resource, { params });
+            return this.handleResponse<T>(response);
+        } catch (error: any) {
+            if (error.response?.data) {
+                return error.response.data as ApiResponse<T>;
+            }
+            return {
+                success: false,
+                data: null as any,
+                message: error.message || 'Unknown error occurred'
+            };
+        }
+    }
+
+    async postRaw<T = any>(resource: string, data: Record<string, any> = {}): Promise<ApiResponse<T>> {
+        try {
+            const response = await this.client.post(resource, data);
+            return this.handleResponse<T>(response);
+        } catch (error: any) {
+            if (error.response?.data) {
+                return error.response.data as ApiResponse<T>;
+            }
+            return {
+                success: false,
+                data: null as any,
+                message: error.message || 'Unknown error occurred'
+            };
+        }
     }
 }
