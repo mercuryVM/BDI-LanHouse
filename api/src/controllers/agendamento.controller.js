@@ -2,7 +2,7 @@ const db = require("../config/database");
 
 exports.createAgendamento = async (req, res) => {
     const { id, dataHoraInicio, dataHoraFim } = req.body;
-    const { rows } = await db.query(
+    await db.query(
         "INSERT INTO agendamento (id, dataHoraInicio, dataHoraFim) VALUES ($1, $2, $3)",
         [id, dataHoraInicio, dataHoraFim]
     );

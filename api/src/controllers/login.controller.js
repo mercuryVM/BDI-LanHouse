@@ -3,7 +3,7 @@ const argon2 = require('argon2');
 const SessionManager = require('../sessions');
 
 exports.login = async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, maquina } = req.body;
     const { rows } = await db.query(
         "SELECT cpf, loginAcesso, senhaAcesso FROM cliente WHERE loginAcesso = $1",
         [username]
@@ -36,6 +36,15 @@ exports.login = async (req, res) => {
 
         });
     }
+
+    //se usuário for cliente, registrar sessao
+    if (user.loginAcesso) {
+        await db.query(
+            "INSERT INTO sessao (cliente, dataHoraInicio, maquina) VALUES ($1, $2, $3)",
+            [user.cpf, new Date(), maquina]
+        );
+    }
+
     res.status(200).send({
         data: token,
         success: true,
