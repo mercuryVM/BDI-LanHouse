@@ -3,9 +3,8 @@ import type APIClient from "../../../API/APIClient";
 import { useUserData } from "../../../Hooks/useUserData";
 import styles from './index.module.css';
 import React from 'react';
-import MineThumb from './assets/mine_thumb.jpg';
 import { Box, Button, Card, Typography } from "@mui/material";
-import { Computer } from "@mui/icons-material";
+import { AccessTime, Computer } from "@mui/icons-material";
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
 
@@ -49,7 +48,7 @@ function LastGames({ userData }: UserDataProps) {
             id: '1',
             nome: 'Jogo A',
             descricao: 'Descrição do Jogo A',
-            url_capa: MineThumb,
+            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
             idade_recomendada: 12,
             multiplayer: true,
         },
@@ -57,7 +56,7 @@ function LastGames({ userData }: UserDataProps) {
             id: '2',
             nome: 'Jogo B',
             descricao: 'Descrição do Jogo B',
-            url_capa: MineThumb,
+            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
             idade_recomendada: 12,
             multiplayer: true,
         },
@@ -65,7 +64,7 @@ function LastGames({ userData }: UserDataProps) {
             id: '3',
             nome: 'Jogo C',
             descricao: 'Descrição do Jogo C',
-            url_capa: MineThumb,
+            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
             idade_recomendada: 12,
             multiplayer: true,
         },
@@ -73,7 +72,7 @@ function LastGames({ userData }: UserDataProps) {
             id: '4',
             nome: 'Jogo D',
             descricao: 'Descrição do Jogo D',
-            url_capa: MineThumb,
+            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
             idade_recomendada: 12,
             multiplayer: true,
         },
@@ -81,7 +80,7 @@ function LastGames({ userData }: UserDataProps) {
             id: '5',
             nome: 'Jogo E',
             descricao: 'Descrição do Jogo E',
-            url_capa: MineThumb,
+            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
             idade_recomendada: 12,
             multiplayer: true,
         },
@@ -89,7 +88,7 @@ function LastGames({ userData }: UserDataProps) {
             id: '6',
             nome: 'Jogo F',
             descricao: 'Descrição do Jogo F',
-            url_capa: MineThumb,
+            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
             idade_recomendada: 12,
             multiplayer: true,
         },
@@ -97,7 +96,7 @@ function LastGames({ userData }: UserDataProps) {
             id: '7',
             nome: 'Jogo G',
             descricao: 'Descrição do Jogo G',
-            url_capa: MineThumb,
+            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
             idade_recomendada: 12,
             multiplayer: true,
         },
@@ -105,7 +104,7 @@ function LastGames({ userData }: UserDataProps) {
             id: '8',
             nome: 'Jogo H',
             descricao: 'Descrição do Jogo H',
-            url_capa: MineThumb,
+            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
             idade_recomendada: 12,
             multiplayer: true,
         },
@@ -237,7 +236,7 @@ function PlataformaHoras({ plataforma }: { plataforma: { nome: string; tipo: num
 
     return (
         <Card className={styles.platformCard}>
-            <Computer />
+            <AccessTime />
             <Typography variant="h6">
                 {durationHours}h {durationMinutes}m
             </Typography>
