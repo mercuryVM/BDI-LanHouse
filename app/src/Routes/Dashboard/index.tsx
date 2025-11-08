@@ -6,6 +6,7 @@ import React, { useMemo } from "react";
 import { Home } from "./Home";
 import type APIClient from "../../API/APIClient";
 import { useUserData } from "../../Hooks/useUserData";
+import { Game } from "./Game";
 
 
 const tabs = [
@@ -17,6 +18,7 @@ const tabs = [
     {
         label: "Jogos",
         icon: <GameIcon />,
+        renderer: Game
     },
     {
         label: "Usuários",
