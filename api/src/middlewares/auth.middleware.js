@@ -26,4 +26,24 @@ function authMiddleware(req, res, next) {
     next();
 }
 
-module.exports = authMiddleware; 
+function authRequireType(types) {
+    return (req, res, next) => {
+        if (!req.sessao) {
+            return res.status(401).json({ 
+                errors: ['Não autenticado'],
+                success: false,
+            });
+        }
+
+        if (!types.includes(req.sessao.tipo)) {
+            return res.status(403).json({
+                errors: ['Acesso negado'],
+                success: false,
+            });
+        }
+
+        next();
+    };
+}
+
+module.exports = {authMiddleware, authRequireType}; 
