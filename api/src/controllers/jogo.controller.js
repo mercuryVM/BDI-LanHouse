@@ -40,18 +40,17 @@ exports.getAllJogos = async (req, res) => {
         GROUP BY j.id, j.nome, j.descricao, j.urlimagem, j.idaderecomendada, j.inicializacao, j.multiplayer
         ORDER BY j.nome
     `);
-    const jogo = rows[0];
 
-    if (!jogo) {
+    if (rows.length == 0) {
         return res.status(404).send({
             success: false,
-            errors: ["Jogo não encontrado!"],
+            errors: ["Jogos não encontrados!"],
         });
     }
 
     res.status(200).send({
         success: true,
-        message: "Jogo consultado com sucesso!",
+        message: "Jogos consultado com sucesso!",
         data: rows.map((row) => {
             return {
                 id: row.id,
@@ -113,6 +112,71 @@ exports.getJogo = async (req, res) => {
         },
     });
 };
+
+exports.getRecentJogos = async (req, res) => {
+    const { id } = req.query
+    //pegar id (cliente, datatimeinicio) das ultimas 10 sessões do usuário (pegar as ultimas datetimefim) em sessao, 
+    // olhar os ids dos jogos que estão com id dessas sessoes (cliente, datatimeinicio) que estão em sessaojogo e 
+    //com os ids dos jogos pegar os dados dos jogos em jogos
+
+    const { rows } = await db.query(`
+        SELECT 
+            s.cliente,
+            s.datatimeinicio as sessao_inicio,
+            s.datetimefim as sessao_fim,
+            j.id as jogo_id, 
+            j.nome as jogo_nome, 
+            j.descricao as jogo_descricao, 
+            j.urlimagem as jogo_urlimagem, 
+            j.idaderecomendada as jogo_idaderecomendada, 
+            j.inicializacao as jogo_inicializacao, 
+            j.multiplayer as jogo_multiplayer,
+            ARRAY_AGG(jp.nomeplataforma) as plataformas
+        FROM sessao s
+        JOIN sessaojogo sj ON s.cliente = sj.cliente AND s.datatimeinicio = sj.datatimeinicio
+        JOIN jogo j ON sj.jogo = j.id
+        LEFT JOIN jogoplataforma jp ON j.id = jp.idjogo
+        WHERE s.cliente = $1 
+        AND s.datatimeinicio IN (
+            SELECT datatimeinicio 
+            FROM sessao 
+            WHERE cliente = $1 
+            ORDER BY datetimefim DESC 
+            LIMIT 10
+        )
+        GROUP BY 
+            s.cliente, s.datatimeinicio, s.datetimefim,
+            j.id, j.nome, j.descricao, j.urlimagem, j.idaderecomendada, 
+            j.inicializacao, j.multiplayer
+        ORDER BY s.datetimefim DESC, j.nome
+
+    `, [id]);
+
+    if (rows.length == 0) {
+        return res.status(404).send({
+            success: false,
+            errors: ["Jogos não encontrados!"],
+        });
+    }
+
+    res.status(200).send({
+        success: true,
+        message: "Jogos consultado com sucesso!",
+        data: rows.map((row) => {
+            return {
+                id: row.id,
+                nome: row.nome,
+                descricao: row.descricao,
+                urlImagem: row.urlimagem,
+                idadeRecomendada: row.idaderecomendada,
+                inicializacao: row.inicializacao,
+                multiplayer: row.multiplayer,
+                plataformas: row.plataformas
+            }
+        })
+
+    });
+}
 
 exports.deleteJogo = async (req, res) => {
     const { id } = req.query;
