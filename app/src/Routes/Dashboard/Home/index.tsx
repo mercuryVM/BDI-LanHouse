@@ -197,24 +197,22 @@ function Sidebar({ userData, client }: { userData: UserData | null, client: APIC
         })
     }
 
-    console.log(userData)
-
     return (
         <div className={styles.sidebar}>
             <h2>Seu saldo</h2>
 
             <div className={styles.plataforms}>
-                <PlataformaHoras plataforma={{
+                <PlataformaHoras userData={userData} plataforma={{
                     nome: 'Computador',
                     tipo: 0,
                     minutos: userData?.tempoComputador || 0
                 }} />
-                <PlataformaHoras plataforma={{
+                <PlataformaHoras userData={userData} plataforma={{
                     nome: 'Console',
                     tipo: 1,
                     minutos: userData?.tempoConsole || 0
                 }} />
-                <PlataformaHoras plataforma={{
+                <PlataformaHoras userData={userData} plataforma={{
                     nome: 'Simulador',
                     tipo: 2,
                     minutos: userData?.tempoSimulador || 0
@@ -252,7 +250,7 @@ function Sidebar({ userData, client }: { userData: UserData | null, client: APIC
     )
 }
 
-function PlataformaHoras({ plataforma }: { plataforma: { nome: string; tipo: number; minutos: number } }) {
+function PlataformaHoras({ plataforma, userData }: { userData: UserData | null, plataforma: { nome: string; tipo: number; minutos: number } }) {
     const [minutos, setMinutes] = React.useState<number>(plataforma.minutos);
 
     React.useEffect(() => {
@@ -261,7 +259,7 @@ function PlataformaHoras({ plataforma }: { plataforma: { nome: string; tipo: num
 
     const durationHours = Math.floor(minutos / 60);
     const durationMinutes = Math.floor((minutos - durationHours * 60));
-    const isCurrent = plataforma.tipo === 0;
+    const isCurrent = plataforma.tipo === userData?.maquina.tipo;
 
     return (
         <Card className={styles.platformCard}>

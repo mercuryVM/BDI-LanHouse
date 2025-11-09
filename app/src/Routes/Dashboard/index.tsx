@@ -1,4 +1,4 @@
-import { AppBar, Tab, Tabs } from "@mui/material";
+import { AppBar, CircularProgress, Dialog, DialogContent, Tab, Tabs } from "@mui/material";
 import HomeIcon from "@mui/icons-material/HomeFilled";
 import GameIcon from "@mui/icons-material/SportsEsports";
 import UserIcon from "@mui/icons-material/Group";
@@ -62,9 +62,19 @@ export default function Dashboard({ client }: { client: APIClient }) {
                 </Tabs>
             </AppBar>
 
-                {
-                    Renderer && <Renderer userData={userData} client={client} />
-                }
+            {
+                !userData && (
+                    <Dialog open={true}>
+                        <DialogContent>
+                            <CircularProgress />
+                        </DialogContent>
+                    </Dialog>
+                )
+            }
+
+            {
+                userData && Renderer && <Renderer userData={userData} client={client} />
+            }
         </>
     )
 }
