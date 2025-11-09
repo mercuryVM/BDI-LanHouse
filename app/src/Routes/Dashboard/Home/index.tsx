@@ -16,12 +16,14 @@ interface UserDataProps {
 
 
 export function Home({ client, userData }: { client: APIClient, userData: UserData | null }) {
+    const isClient = userData?.role === 'cliente';
+
     return (
         <div style={{ display: "flex", flex: 1 }}>
             <div className={styles.container}>
                 <h2 className={styles.header}>Bem-vindo, {userData?.nome}</h2>
-                <VIPStatus userData={userData} />
-                <LastGames userData={userData} />
+                {isClient && <VIPStatus userData={userData} />}
+                {isClient && <LastGames userData={userData} />}
             </div>
 
             <Sidebar client={client} userData={userData} />
@@ -185,6 +187,7 @@ function LastGames({ userData }: UserDataProps) {
 function Sidebar({ userData, client }: { userData: UserData | null, client: APIClient }) {
     const [modalLogoutOpen, setModalLogoutOpen] = React.useState<boolean>(false);
     const [loading, setLoading] = React.useState<boolean>(false);
+    const isClient = userData?.role === 'cliente';
 
     const navigate = useNavigate();
 
@@ -199,25 +202,29 @@ function Sidebar({ userData, client }: { userData: UserData | null, client: APIC
 
     return (
         <div className={styles.sidebar}>
-            <h2>Seu saldo</h2>
+            {isClient && (
+                <>
+                    <h2>Seu saldo</h2>
 
-            <div className={styles.plataforms}>
-                <PlataformaHoras userData={userData} plataforma={{
-                    nome: 'Computador',
-                    tipo: 0,
-                    minutos: userData?.tempoComputador || 0
-                }} />
-                <PlataformaHoras userData={userData} plataforma={{
-                    nome: 'Console',
-                    tipo: 1,
-                    minutos: userData?.tempoConsole || 0
-                }} />
-                <PlataformaHoras userData={userData} plataforma={{
-                    nome: 'Simulador',
-                    tipo: 2,
-                    minutos: userData?.tempoSimulador || 0
-                }} />
-            </div>
+                    <div className={styles.plataforms}>
+                        <PlataformaHoras userData={userData} plataforma={{
+                            nome: 'Computador',
+                            tipo: 0,
+                            minutos: userData?.tempoComputador || 0
+                        }} />
+                        <PlataformaHoras userData={userData} plataforma={{
+                            nome: 'Console',
+                            tipo: 1,
+                            minutos: userData?.tempoConsole || 0
+                        }} />
+                        <PlataformaHoras userData={userData} plataforma={{
+                            nome: 'Simulador',
+                            tipo: 2,
+                            minutos: userData?.tempoSimulador || 0
+                        }} />
+                    </div>
+                </>
+            )}
 
             <div className={styles.sidebarBottom}>
                 <Button onClick={() => setModalLogoutOpen(true)} variant="contained" color="secondary" fullWidth>
