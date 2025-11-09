@@ -7,6 +7,7 @@ import { Box, Button, Card, Typography } from "@mui/material";
 import { AccessTime, Computer } from "@mui/icons-material";
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
+import { GameCard } from "../../../Components/GameCard";
 
 interface UserDataProps {
     userData: UserData | null
@@ -178,21 +179,6 @@ function LastGames({ userData }: UserDataProps) {
                     }
                 </animated.div>
             </div>
-        </div>
-    )
-}
-
-function GameCard({ game }: { game: Game }) {
-    return (
-        <div 
-            className={styles.gameCard}
-            style={{
-                minWidth: '180px',
-                flexShrink: 0
-            }}
-        >
-            <img draggable={false} src={game.url_capa} alt={game.nome} className={styles.gameImage} />
-            <h4 className={styles.gameTitle}>{game.nome}</h4>
         </div>
     )
 }
