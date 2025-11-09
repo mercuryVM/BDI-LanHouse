@@ -17,6 +17,7 @@ function createWindow () {
             nodeIntegration: false,
             contextIsolation: true,
         },
+        fullscreen: true,
         title: "Arena Gamer"
     });
     
