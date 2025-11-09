@@ -117,6 +117,17 @@ export default class APIClient {
         return new Error(error.message || 'Unknown error occurred');
     }
 
+    async logout(): Promise<void> {
+        try {
+            await this.post('/logout');
+            this.token = null as any;
+            this.userData = null;
+            localStorage.removeItem('api_token');
+        } catch (e) {
+            console.error('Logoff failed:', e);
+        }
+    }
+
     async login(username: string, password: string, maquina: number): Promise<string> {
         try {
             const token = await this.post<string>('/login', { username, password, maquina });
