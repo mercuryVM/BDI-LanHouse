@@ -21,7 +21,7 @@ const tabs = [
         renderer: Game
     },
     {
-        label: "Usuários",
+        label: "Clientes",
         icon: <UserIcon />,
         permission: 'clt'
     }
