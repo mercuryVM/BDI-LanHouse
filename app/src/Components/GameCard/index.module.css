@@ -24,6 +24,7 @@
 }
 
 .gameTitle {
+    text-align: center;
     font-weight: 600;
     z-index: 1;
     position: absolute;
@@ -31,10 +32,12 @@
     left: 50%;
     transform: translateX(-50%);
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+    font-size: 14px;
 }
 
 .gameCard:hover .gameImage {
     transform: scale(1.1);
+    filter: blur(2px);
 }
 
 .gameCard:hover .gameTitle {
