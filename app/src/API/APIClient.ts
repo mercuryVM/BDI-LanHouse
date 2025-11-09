@@ -13,8 +13,8 @@ export interface UserData {
 }
 
 export interface Maquina {
-    id: Number;
-    nomeplat: String;
+    id: number;
+    nomeplat: string;
     tipo: 0 | 1 | 2; // 0: PC, 1: Console, 2: Simulador
 }
 
@@ -36,9 +36,11 @@ export interface Game {
     id: string;
     nome: string;
     descricao: string;
-    idade_recomendada: number;
+    idadeRecomendada: number;
     multiplayer: boolean;
-    url_capa: string;
+    urlImagem: string;
+    inicializacao: string;
+    plataformas: string[];
 }
 
 export default class APIClient {
@@ -145,6 +147,15 @@ export default class APIClient {
         } catch (error) {
             console.error('Login failed:', error);
             throw error;
+        }
+    }
+
+    async getAllJogos(): Promise<Game[]> {
+        try {
+            const jogos = await this.get<Game[]>('/getAllJogos');
+            return jogos;
+        } catch (error) {
+            throw this.handleError(error);
         }
     }
 
