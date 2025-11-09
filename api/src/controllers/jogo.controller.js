@@ -1,25 +1,46 @@
 const db = require("../config/database");
 
 exports.createJogo = async (req, res) => {
-    const { id, nome, descricao, urlimagem, idaderecomendada, inicializacao } = req.body;
+    const { id, nome, descricao, urlimagem, idaderecomendada, inicializacao, multiplayer, plataformas } = req.body;
     await db.query(
-        "INSERT INTO jogo (id, nome, descricao, urlimagem, idaderecomendada, inicializacao) VALUES ($1, $2, $3, $4, $5, $6)",
-        [id, nome, descricao, urlimagem, idaderecomendada, inicializacao]
+        "INSERT INTO jogo (id, nome, descricao, urlimagem, idaderecomendada, inicializacao, multiplayer) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+        [id, nome, descricao, urlimagem, idaderecomendada, inicializacao, multiplayer]
     );
+
+    for (let plat of plataformas.length) {
+        await db.query(
+            "INSERT INTO jogoplataforma (idjogo, nomeplataforma) VALUES ($1, $2)",
+            [id, plat]
+        );
+    }
+
     res.status(201).send({
         success: true,
         message: "Jogo adicionado com sucesso!",
         data: {
-            jogo: { id, nome, descricao, urlimagem, idaderecomendada, inicializacao }
+            jogo: { id, nome, descricao, urlimagem, idaderecomendada, inicializacao, multiplayer }
         },
     });
 };
 
 exports.getAllJogos = async (req, res) => {
-    const { rows } = await db.query(
-        "SELECT * FROM jogo",
-        [id]
-    );
+    //pegar todos os jogos e as plataformas associadas sem ficar repetindo jogos porque pode haver multiplas plataformas
+    const { rows } = await db.query(`
+    SELECT 
+            j.id, 
+            j.nome, 
+            j.descricao, 
+            j.urlimagem, 
+            j.idaderecomendada, 
+            j.inicializacao, 
+            j.multiplayer,
+            ARRAY_AGG(jp.nomeplataforma) as plataformas
+        FROM jogo j 
+        LEFT JOIN jogoplataforma jp ON j.id = jp.idjogo
+        GROUP BY j.id, j.nome, j.descricao, j.urlimagem, j.idaderecomendada, j.inicializacao, j.multiplayer
+        ORDER BY j.nome
+    `);
+    const jogo = rows[0];
 
     if (!jogo) {
         return res.status(404).send({
@@ -28,28 +49,43 @@ exports.getAllJogos = async (req, res) => {
         });
     }
 
-        res.status(200).send({
-            success: true,
-            message: "Jogo consultado com sucesso!",
-            data: rows.map((row) => {
-                return {
-                    id: row.id,
-                    nome: row.nome,
-                    descricao: row.descricao,
-                    urlImagem: row.urlimagem,
-                    idadeRecomendada: row.idaderecomendada,
-                    inicializacao: row.inicializacao,
-                    plataforma: row.plataforma
-                }
-            })
+    res.status(200).send({
+        success: true,
+        message: "Jogo consultado com sucesso!",
+        data: rows.map((row) => {
+            return {
+                id: row.id,
+                nome: row.nome,
+                descricao: row.descricao,
+                urlImagem: row.urlimagem,
+                idadeRecomendada: row.idaderecomendada,
+                inicializacao: row.inicializacao,
+                multiplayer: row.multiplayer,
+                plataformas: row.plataformas
+            }
+        })
 
-        });
+    });
 };
 
 exports.getJogo = async (req, res) => {
     const { id } = req.query;
-    const { rows } = await db.query(
-        "SELECT * FROM jogo WHERE id = $1",
+    const { rows } = await db.query(`
+    SELECT 
+            j.id, 
+            j.nome, 
+            j.descricao, 
+            j.urlimagem, 
+            j.idaderecomendada, 
+            j.inicializacao, 
+            j.multiplayer,
+            ARRAY_AGG(jp.nomeplataforma) as plataformas
+        FROM jogo j 
+        LEFT JOIN jogoplataforma jp ON j.id = jp.idjogo
+        GROUP BY j.id, j.nome, j.descricao, j.urlimagem, j.idaderecomendada, j.inicializacao, j.multiplayer
+        ORDER BY j.nome
+        WHERE j.id = $1
+    `,
         [id]
     );
     const jogo = rows[0];
@@ -72,7 +108,7 @@ exports.getJogo = async (req, res) => {
                 urlImagem: jogo.urlimagem,
                 idadeRecomendada: jogo.idaderecomendada,
                 inicializacao: jogo.inicializacao,
-                plataforma: jogo.plataforma
+                multiplayer: jogo.multiplayer
             }
         },
     });
