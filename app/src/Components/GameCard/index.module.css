@@ -35,17 +35,14 @@
     font-size: 14px;
 }
 
-.gameCard:hover .gameImage {
+.gameCard:hover:not(.disabled) .gameImage {
     transform: scale(1.1);
     filter: blur(2px);
-}
-
-.gameCard:hover .gameTitle {
-    text-decoration: underline;
-}
-
-.gameCard:hover .gameImage {
     opacity: 0.7;
+}
+
+.gameCard:hover:not(.disabled) .gameTitle {
+    text-decoration: underline;
 }
 
 .gameVignette {
@@ -56,4 +53,10 @@
     height: 50%;
     background: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
     z-index: 0;
+}
+
+.disabled {
+    cursor: not-allowed !important;
+    opacity: 0.5;
+    filter: grayscale(100%);
 }

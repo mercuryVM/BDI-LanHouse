@@ -13,8 +13,8 @@ export interface UserData {
 }
 
 export interface Maquina {
-    id: Number;
-    nomeplat: String;
+    id: number;
+    nomeplat: string;
     tipo: 0 | 1 | 2; // 0: PC, 1: Console, 2: Simulador
 }
 
@@ -40,7 +40,7 @@ export interface Game {
     multiplayer: boolean;
     urlImagem: string;
     inicializacao: string;
-    plataforma: string;
+    plataformas: string[];
 }
 
 export default class APIClient {
