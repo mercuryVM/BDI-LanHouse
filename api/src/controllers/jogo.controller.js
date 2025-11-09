@@ -114,10 +114,13 @@ exports.getJogo = async (req, res) => {
 };
 
 exports.getRecentJogos = async (req, res) => {
-    const { id } = req.query
     //pegar id (cliente, datetimeinicio) das ultimas 10 sessões do usuário (pegar as ultimas datetimefim) em sessao, 
     // olhar os ids dos jogos que estão com id dessas sessoes (cliente, datetimeinicio) que estão em sessaojogo e 
     //com os ids dos jogos pegar os dados dos jogos em jogos
+    const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(' ')[1];
+    const id = SessionManager.getSession(token).userId;
 
     const { rows } = await db.query(`
         SELECT 
@@ -151,7 +154,7 @@ exports.getRecentJogos = async (req, res) => {
         ORDER BY s.datetimefim DESC, j.nome
 
     `, [id]);
-    
+
     res.status(200).send({
         success: true,
         message: "Jogos consultado com sucesso!",
