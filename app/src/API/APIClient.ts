@@ -117,9 +117,9 @@ export default class APIClient {
         return new Error(error.message || 'Unknown error occurred');
     }
 
-    async login(username: string, password: string): Promise<string> {
+    async login(username: string, password: string, maquina: number): Promise<string> {
         try {
-            const token = await this.post<string>('/login', { username, password });
+            const token = await this.post<string>('/login', { username, password, maquina });
 
             this.token = token;
 

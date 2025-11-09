@@ -9,6 +9,9 @@ export function Game({ client }: { client: APIClient }) {
         <div style={{ display: "flex", flex: 1 }}>
             <div className={styles.container}>
                 <h2 className={styles.header}>Catálogo de Jogos</h2>
+                <div className={styles.gamesGrid}>
+
+                </div>
             </div>
         </div>
     )

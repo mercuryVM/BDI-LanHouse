@@ -38,11 +38,12 @@ exports.login = async (req, res) => {
     }
 
     //se usuário for cliente, registrar sessao
-    if (user.loginAcesso) {
-        await db.query(
-            "INSERT INTO sessao (cliente, dataHoraInicio, maquina) VALUES ($1, $2, $3)",
+    if (user.loginacesso) {
+        const response = await db.query(
+            "INSERT INTO sessao (cliente, datetimeinicio, maquina) VALUES ($1, $2, $3)",
             [user.cpf, new Date(), maquina]
         );
+        console.log(response)
     }
 
     res.status(200).send({
