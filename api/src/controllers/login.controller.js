@@ -111,7 +111,7 @@ exports.logout = async (req, res) => {
         const startDateLux = DateTime.fromISO(startDate.toISOString());
         const endDateLux = DateTime.fromISO(endDate.toISOString());
 
-        const diffInMinutes = endDateLux.diff(startDateLux, 'minutes').minutes.floor();
+        const diffInMinutes = Math.floor(endDateLux.diff(startDateLux, 'minutes').minutes);
 
         switch (tipoMaq.tipo) {
             case 0:
