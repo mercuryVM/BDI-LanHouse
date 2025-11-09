@@ -9,6 +9,8 @@ import { useDrag } from '@use-gesture/react';
 import { GameCard } from "../../../Components/GameCard";
 import { useNavigate } from "react-router";
 import { useUserDataRedux } from "../../../hooks/useUserDataRedux";
+import { useDispatch } from "react-redux";
+import { clearUserData } from "../../../store/slices/userDataSlice";
 
 interface UserDataProps {
     userData: UserData | null
@@ -187,10 +189,12 @@ function Sidebar({ userData, client }: { userData: UserData | null, client: APIC
     const [loading, setLoading] = React.useState<boolean>(false);
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleLogout = () => {
         setLoading(true);
         client.logout().then(() => {
+            dispatch(clearUserData());
             navigate('/');
         }).finally(() => {
             setLoading(false);
