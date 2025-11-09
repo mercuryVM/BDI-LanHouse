@@ -25,7 +25,7 @@ export function Home({ client, userData }: { client: APIClient, userData: UserDa
             <div className={styles.container}>
                 <h2 className={styles.header}>Bem-vindo, {userData?.nome}</h2>
                 {isClient && <VIPStatus userData={userData} />}
-                {isClient && <LastGames userData={userData} />}
+                {isClient && <LastGames userData={userData} client={client} />}
             </div>
 
             <Sidebar client={client} userData={userData} />
@@ -46,73 +46,8 @@ function VIPStatus({ userData }: UserDataProps) {
     )
 }
 
-function LastGames({ userData }: UserDataProps) {
-    const [lastGames, setLastGames] = React.useState<Game[]>([
-        {
-            id: '1',
-            nome: 'Jogo A',
-            descricao: 'Descrição do Jogo A',
-            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
-            idade_recomendada: 12,
-            multiplayer: true,
-        },
-        {
-            id: '2',
-            nome: 'Jogo B',
-            descricao: 'Descrição do Jogo B',
-            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
-            idade_recomendada: 12,
-            multiplayer: true,
-        },
-        {
-            id: '3',
-            nome: 'Jogo C',
-            descricao: 'Descrição do Jogo C',
-            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
-            idade_recomendada: 12,
-            multiplayer: true,
-        },
-        {
-            id: '4',
-            nome: 'Jogo D',
-            descricao: 'Descrição do Jogo D',
-            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
-            idade_recomendada: 12,
-            multiplayer: true,
-        },
-        {
-            id: '5',
-            nome: 'Jogo E',
-            descricao: 'Descrição do Jogo E',
-            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
-            idade_recomendada: 12,
-            multiplayer: true,
-        },
-        {
-            id: '6',
-            nome: 'Jogo F',
-            descricao: 'Descrição do Jogo F',
-            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
-            idade_recomendada: 12,
-            multiplayer: true,
-        },
-        {
-            id: '7',
-            nome: 'Jogo G',
-            descricao: 'Descrição do Jogo G',
-            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
-            idade_recomendada: 12,
-            multiplayer: true,
-        },
-        {
-            id: '8',
-            nome: 'Jogo H',
-            descricao: 'Descrição do Jogo H',
-            url_capa: 'http://localhost:8080/public/games/mine_thumb.jpg',
-            idade_recomendada: 12,
-            multiplayer: true,
-        },
-    ]);
+function LastGames({ userData, client }: { userData: UserData | null, client: APIClient }) {
+    const [lastGames, setLastGames] = React.useState<Game[] | null>(null);
 
     const [{ x }, api] = useSpring(() => ({ x: 0 }));
     const initialX = React.useRef(0);
@@ -124,12 +59,12 @@ function LastGames({ userData }: UserDataProps) {
         const cardWidth = 180 + 16; // minWidth + gap
         const totalWidth = lastGames.length * cardWidth;
         const maxScroll = Math.max(0, totalWidth - containerWidth);
-        
+
         if (first) {
             // Salva a posição inicial quando começa o drag
             initialX.current = x.get();
         }
-        
+
         let newX;
         if (down) {
             // Durante o drag, adiciona o movimento à posição inicial do drag
@@ -138,21 +73,29 @@ function LastGames({ userData }: UserDataProps) {
             // Quando solta, aplica a inércia
             newX = x.get() + vx * 100;
         }
-        
+
         // Aplica os limites
         newX = Math.min(0, Math.max(-maxScroll, newX));
-        
-        api.start({ 
+
+        api.start({
             x: newX,
             immediate: down,
             config: { tension: 300, friction: 30 }
         });
     });
 
+    useEffect(() => {
+        if (client) {
+            client.getRecentJogos().then(games => {
+                setLastGames(games);
+            });
+        }
+    }, [client])
+
     return (
         <div>
             <h3>Seus Jogos Recentes</h3>
-            <div 
+            <div
                 {...bind()}
                 ref={containerRef}
                 className={styles.gamesViewport}
@@ -162,7 +105,7 @@ function LastGames({ userData }: UserDataProps) {
                     touchAction: 'pan-y'
                 }}
             >
-                <animated.div 
+                <animated.div
                     className={styles.gamesGrid}
                     style={{
                         transform: x.to(x => `translateX(${x}px)`),
@@ -172,13 +115,14 @@ function LastGames({ userData }: UserDataProps) {
                     }}
                 >
                     {
-                        lastGames.length === 0 ? (
-                            <p>Nenhum jogo recente encontrado.</p>
-                        ) : (
-                            lastGames.map(game => (
-                                <GameCard key={game.id} game={game} />
-                            ))
+                        !lastGames && (
+                            <CircularProgress />
                         )
+                    }
+                    {
+                        lastGames && lastGames.map(game => (
+                            <GameCard key={game.id} game={game} />
+                        ))
                     }
                 </animated.div>
             </div>

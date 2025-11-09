@@ -29,14 +29,14 @@ function authMiddleware(req, res, next) {
 
 function authRequireType(types) {
     return (req, res, next) => {
-        if (!req.sessao) {
+        if (!req.session) {
             return res.status(401).json({ 
                 errors: ['Não autenticado'],
                 success: false,
             });
         }
 
-        if (!types.includes(req.sessao.tipo)) {
+        if (!types.includes(req.session.type)) {
             return res.status(403).json({
                 errors: ['Acesso negado'],
                 success: false,

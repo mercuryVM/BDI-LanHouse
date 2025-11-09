@@ -159,6 +159,15 @@ export default class APIClient {
         }
     }
 
+    async getRecentJogos(): Promise<Game[]> {
+        try {
+            const jogos = await this.get<Game[]>('/getRecentJogos');
+            return jogos;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     // Métodos utilitários para diferentes tipos de requisições
     async put<T = any>(resource: string, data: Record<string, any> = {}): Promise<T> {
         try {

@@ -151,14 +151,7 @@ exports.getRecentJogos = async (req, res) => {
         ORDER BY s.datetimefim DESC, j.nome
 
     `, [id]);
-
-    if (rows.length == 0) {
-        return res.status(404).send({
-            success: false,
-            errors: ["Jogos não encontrados!"],
-        });
-    }
-
+    
     res.status(200).send({
         success: true,
         message: "Jogos consultado com sucesso!",
