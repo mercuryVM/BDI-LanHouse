@@ -23,7 +23,7 @@ export default function Home({ client }: { client: APIClient }) {
         setLoading(true);
 
         try {
-            let response = await client.login(username, password);
+            let response = await client.login(username, password, 1);
 
             if (response) {
                 navigate("/dashboard");

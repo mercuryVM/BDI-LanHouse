@@ -46,6 +46,7 @@ exports.login = async (req, res) => {
             "INSERT INTO sessao (cliente, datetimeinicio, maquina) VALUES ($1, $2, $3)",
             [user.cpf, date, maquina]
         );
+        console.log(response)
     }
 
     res.status(200).send({
