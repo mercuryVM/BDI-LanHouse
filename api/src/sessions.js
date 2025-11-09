@@ -9,13 +9,13 @@ class SessionManager {
         return crypto.randomBytes(64).toString('hex');
     }
 
-    createSession(userType, userId) {
+    createSession(userType, userId, date) {
         const token = this.createToken();
         this.sessions.set(token, {
             userType,
             userId,
-            createAt: new Date(),
-            lastUse: new Date()
+            createAt: date,
+            lastUse: date
         });
 
         return token;
