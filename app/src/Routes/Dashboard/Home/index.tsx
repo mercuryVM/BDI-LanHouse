@@ -1,23 +1,21 @@
 import type { UserData, Game } from "../../../API/APIClient";
 import type APIClient from "../../../API/APIClient";
-import { useUserData } from "../../../Hooks/useUserData";
 import styles from './index.module.css';
-import React from 'react';
-import { Box, Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, Modal, Typography } from "@mui/material";
+import React, { useEffect } from 'react';
+import { Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Modal, Typography } from "@mui/material";
 import { AccessTime, Computer } from "@mui/icons-material";
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
 import { GameCard } from "../../../Components/GameCard";
 import { useNavigate } from "react-router";
+import { useUserDataRedux } from "../../../hooks/useUserDataRedux";
 
 interface UserDataProps {
     userData: UserData | null
 }
 
 
-export function Home({ client }: { client: APIClient }) {
-    const userData = useUserData(client);
-
+export function Home({ client, userData }: { client: APIClient, userData: UserData | null }) {
     return (
         <div style={{ display: "flex", flex: 1 }}>
             <div className={styles.container}>
@@ -186,14 +184,20 @@ function LastGames({ userData }: UserDataProps) {
 
 function Sidebar({ userData, client }: { userData: UserData | null, client: APIClient }) {
     const [modalLogoutOpen, setModalLogoutOpen] = React.useState<boolean>(false);
+    const [loading, setLoading] = React.useState<boolean>(false);
 
     const navigate = useNavigate();
 
     const handleLogout = () => {
+        setLoading(true);
         client.logout().then(() => {
             navigate('/');
-        });
+        }).finally(() => {
+            setLoading(false);
+        })
     }
+
+    console.log(userData)
 
     return (
         <div className={styles.sidebar}>
@@ -229,12 +233,17 @@ function Sidebar({ userData, client }: { userData: UserData | null, client: APIC
                 </DialogTitle>
                 <DialogContent>
                     <Typography>Tem certeza que deseja encerrar sua sessão?</Typography>
+                    {
+                        loading && (
+                            <CircularProgress size={24} style={{ marginLeft: 16 }} />
+                        )
+                    }
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setModalLogoutOpen(false)} color="primary">
                         Cancelar
                     </Button>
-                    <Button onClick={handleLogout} color="secondary">
+                    <Button disabled={loading} onClick={handleLogout} color="secondary">
                         Encerrar
                     </Button>
                 </DialogActions>
@@ -244,8 +253,14 @@ function Sidebar({ userData, client }: { userData: UserData | null, client: APIC
 }
 
 function PlataformaHoras({ plataforma }: { plataforma: { nome: string; tipo: number; minutos: number } }) {
-    const durationHours = Math.floor(plataforma.minutos / 60);
-    const durationMinutes = Math.floor((plataforma.minutos - durationHours * 60));
+    const [minutos, setMinutes] = React.useState<number>(plataforma.minutos);
+
+    React.useEffect(() => {
+        setMinutes(plataforma.minutos);
+    }, [plataforma.minutos]);
+
+    const durationHours = Math.floor(minutos / 60);
+    const durationMinutes = Math.floor((minutos - durationHours * 60));
     const isCurrent = plataforma.tipo === 0;
 
     return (

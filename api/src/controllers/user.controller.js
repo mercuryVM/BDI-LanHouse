@@ -30,7 +30,8 @@ exports.user = async (req, res) => {
         role: userType === 'cliente' ? 'cliente' : 'clt',
         tempoComputador: user.tempocomputador || 0,
         tempoConsole: user.tempoconsole || 0,
-        tempoSimulador: user.temposimulador || 0
+        tempoSimulador: user.temposimulador || 0,
+        maquina: req.session.maquina || null
     };
 
     res.status(200).send({

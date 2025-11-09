@@ -1,10 +1,8 @@
 import type APIClient from "../../../API/APIClient";
-import { useUserData } from "../../../Hooks/useUserData";
+import { useUserDataRedux } from "../../../hooks/useUserDataRedux";
 import styles from './index.module.css';
 
 export function Game({ client }: { client: APIClient }) {
-    const userData = useUserData(client);
-
     return (
         <div style={{ display: "flex", flex: 1 }}>
             <div className={styles.container}>

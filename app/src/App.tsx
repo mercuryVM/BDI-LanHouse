@@ -6,6 +6,8 @@ import { createTheme, ThemeProvider } from '@mui/material'
 import Dashboard from './Routes/Dashboard'
 import { useClient } from './Hooks/useClient'
 import type APIClient from './API/APIClient'
+import { Provider } from 'react-redux'
+import { store } from './store'
 
 const theme = createTheme({
   palette: {
@@ -57,16 +59,16 @@ function App() {
   const client: APIClient = useClient();
 
   return (
-    <>
+    <Provider store={store}>
       <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <Routes>
-          <Route path={"/"} element={<Home client={client} />} />
-          <Route path={"/dashboard"} element={<Dashboard client={client} />} />
-        </Routes>
-      </ThemeProvider>
+        <ThemeProvider theme={theme}>
+          <Routes>
+            <Route path={"/"} element={<Home client={client} />} />
+            <Route path={"/dashboard"} element={<Dashboard client={client} />} />
+          </Routes>
+        </ThemeProvider>
       </BrowserRouter>
-    </>
+    </Provider>
   )
 }
 

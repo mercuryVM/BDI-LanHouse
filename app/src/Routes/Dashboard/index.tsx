@@ -5,7 +5,7 @@ import UserIcon from "@mui/icons-material/Group";
 import React, { useMemo } from "react";
 import { Home } from "./Home";
 import type APIClient from "../../API/APIClient";
-import { useUserData } from "../../Hooks/useUserData";
+import { useUserDataRedux } from "../../hooks/useUserDataRedux";
 import { Game } from "./Game";
 
 
@@ -29,7 +29,7 @@ const tabs = [
 
 export default function Dashboard({ client }: { client: APIClient }) {
     const [value, setValue] = React.useState(0);
-    const userData = useUserData(client);
+    const { userData } = useUserDataRedux(client, true);
 
     const userRole = useMemo(() => {
         return userData?.role;
@@ -63,7 +63,7 @@ export default function Dashboard({ client }: { client: APIClient }) {
             </AppBar>
 
                 {
-                    Renderer && <Renderer client={client} />
+                    Renderer && <Renderer userData={userData} client={client} />
                 }
         </>
     )

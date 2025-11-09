@@ -9,6 +9,13 @@ export interface UserData {
     tempoSimulador?: number;
     tempoConsole?: number;
     tempoComputador?: number;
+    maquina: Maquina
+}
+
+export interface Maquina {
+    id: Number;
+    nomeplat: String;
+    tipo: 0 | 1 | 2; // 0: PC, 1: Console, 2: Simulador
 }
 
 export interface PlataformasMinutos {

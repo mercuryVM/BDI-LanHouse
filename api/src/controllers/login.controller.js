@@ -28,10 +28,6 @@ exports.login = async (req, res) => {
 
     const validPassword = await argon2.verify(user.senhaacesso, password);
 
-    const date = new Date();
-
-    const token = SessionManager.createSession(user.loginacesso ? 'cliente' : 'funcionario', user.cpf, date);
-
     if (!validPassword) {
         return res.status(401).send({
             errors: ["Senha inválida!"],
@@ -39,6 +35,22 @@ exports.login = async (req, res) => {
 
         });
     }
+
+    const maquinaResult = await db.query(
+        "SELECT id, nomeplat, tipo FROM maquina INNER JOIN plataforma ON plataforma.nome = maquina.nomeplat WHERE id = $1 LIMIT 1",
+        [maquina]
+    );
+
+    if (maquinaResult.rows.length === 0) {
+        return res.status(404).send({
+            errors: ["Máquina não encontrada!"],
+            success: false,
+        });
+    }
+
+    const date = new Date();
+
+    const token = SessionManager.createSession(user.loginacesso ? 'cliente' : 'funcionario', user.cpf, date, maquinaResult.rows[0]);
 
     //se usuário for cliente, registrar sessao
     if (user.loginacesso) {

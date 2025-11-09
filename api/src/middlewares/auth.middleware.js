@@ -20,7 +20,8 @@ function authMiddleware(req, res, next) {
 
     req.session = { 
         type: sessionData.userType, 
-        id: sessionData.userId 
+        id: sessionData.userId,
+        maquina: sessionData.maquina
     };
 
     next();
