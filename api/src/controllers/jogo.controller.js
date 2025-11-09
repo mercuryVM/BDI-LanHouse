@@ -1,4 +1,5 @@
 const db = require("../config/database");
+const SessionManager = require('../sessions');
 
 exports.createJogo = async (req, res) => {
     const { id, nome, descricao, urlimagem, idaderecomendada, inicializacao, multiplayer, plataformas } = req.body;
@@ -160,13 +161,13 @@ exports.getRecentJogos = async (req, res) => {
         message: "Jogos consultado com sucesso!",
         data: rows.map((row) => {
             return {
-                id: row.id,
-                nome: row.nome,
-                descricao: row.descricao,
-                urlImagem: row.urlimagem,
-                idadeRecomendada: row.idaderecomendada,
-                inicializacao: row.inicializacao,
-                multiplayer: row.multiplayer,
+                id: row.jogo_id,
+                nome: row.jogo_nome,
+                descricao: row.jogo_descricao,
+                urlImagem: row.jogo_urlimagem,
+                idadeRecomendada: row.jogo_idaderecomendada,
+                inicializacao: row.jogo_inicializacao,
+                multiplayer: row.jogo_multiplayer,
                 plataformas: row.plataformas
             }
         })
