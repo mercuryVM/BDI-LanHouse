@@ -61,7 +61,7 @@ exports.login = async (req, res) => {
     //se cabeçalho estiver no repositorio (rec.sessão = objeto que ta no repositorio) next() senão 401
 }
 
-exports.logoff = async (req, res) => {
+exports.logout = async (req, res) => {
     //se for funcionario -> delete sessão interna
     // se for cliente -> delete sessão interna, atualiza sessão do banco e pegar plataforma da maquina pra pegar tipo da platadorma decrementar uma das 3 variaveis do cliente 
     // (decrementa tempo que passou entre fim e inicio)
