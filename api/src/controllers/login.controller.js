@@ -77,7 +77,7 @@ exports.logout = async (req, res) => {
     if (userType == 'cliente') {
         const endDate = new Date()
 
-        await bd.query(
+        await db.query(
             "UPDATE sessao SET datetimefim = $1 WHERE cliente = $2 AND datetimeinicio = $3",
             [endDate, userId, startDate]
         );
