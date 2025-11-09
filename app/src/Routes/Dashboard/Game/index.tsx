@@ -4,6 +4,7 @@ import { GameCard } from "../../../Components/GameCard";
 import { useState, useEffect } from "react";
 import React from "react";
 import styles from './index.module.css';
+import { CircularProgress, Dialog, DialogContent } from "@mui/material";
 
 export function Game({ client }: { client: APIClient }) {
     const [games, setGames] = useState<Game[] | null>(null);
@@ -17,6 +18,13 @@ export function Game({ client }: { client: APIClient }) {
             <div className={styles.container}>
                 <h2 className={styles.header}>Catálogo de Jogos</h2>
                 <div className={styles.gamesGrid}>
+                    {!games && (
+                        <Dialog open={true}>
+                            <DialogContent>
+                                <CircularProgress />
+                            </DialogContent>
+                        </Dialog>
+                    )}
 
                     {games && games.map((game) => (
                         <GameCard key={game.id} game={game} />
