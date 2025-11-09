@@ -15,10 +15,41 @@ exports.createJogo = async (req, res) => {
     });
 };
 
+exports.getAllJogos = async (req, res) => {
+    const { rows } = await db.query(
+        "SELECT * FROM jogo",
+        [id]
+    );
+
+    if (!jogo) {
+        return res.status(404).send({
+            success: false,
+            errors: ["Jogo não encontrado!"],
+        });
+    }
+
+        res.status(200).send({
+            success: true,
+            message: "Jogo consultado com sucesso!",
+            data: rows.map((row) => {
+                return {
+                    id: row.id,
+                    nome: row.nome,
+                    descricao: row.descricao,
+                    urlImagem: row.urlimagem,
+                    idadeRecomendada: row.idaderecomendada,
+                    inicializacao: row.inicializacao,
+                    plataforma: row.plataforma
+                }
+            })
+
+        });
+};
+
 exports.getJogo = async (req, res) => {
     const { id } = req.query;
     const { rows } = await db.query(
-        "SELECT id, nome, descricao, urlimagem, idaderecomendada, inicializacao FROM jogo WHERE id = $1",
+        "SELECT * FROM jogo WHERE id = $1",
         [id]
     );
     const jogo = rows[0];
@@ -38,9 +69,10 @@ exports.getJogo = async (req, res) => {
                 id: jogo.id,
                 nome: jogo.nome,
                 descricao: jogo.descricao,
-                urlimagem: jogo.urlimagem,
-                idaderecomendada: jogo.idaderecomendada,
+                urlImagem: jogo.urlimagem,
+                idadeRecomendada: jogo.idaderecomendada,
                 inicializacao: jogo.inicializacao,
+                plataforma: jogo.plataforma
             }
         },
     });
