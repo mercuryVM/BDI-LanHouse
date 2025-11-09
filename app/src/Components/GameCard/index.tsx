@@ -13,6 +13,7 @@ export function GameCard({ game }: { game: Game }) {
         >
             <img draggable={false} src={"http://localhost:8080/public/" + game.urlImagem} alt={game.nome} className={styles.gameImage} />
             <h4 className={styles.gameTitle}>{game.nome}</h4>
+            <div className={styles.gameVignette}></div>
         </div>
     )
 }
