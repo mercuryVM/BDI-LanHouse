@@ -3,11 +3,12 @@ import type APIClient from "../../../API/APIClient";
 import { useUserData } from "../../../Hooks/useUserData";
 import styles from './index.module.css';
 import React from 'react';
-import { Box, Button, Card, Typography } from "@mui/material";
+import { Box, Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, Modal, Typography } from "@mui/material";
 import { AccessTime, Computer } from "@mui/icons-material";
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
 import { GameCard } from "../../../Components/GameCard";
+import { useNavigate } from "react-router";
 
 interface UserDataProps {
     userData: UserData | null
@@ -25,7 +26,7 @@ export function Home({ client }: { client: APIClient }) {
                 <LastGames userData={userData} />
             </div>
 
-            <Sidebar userData={userData} />
+            <Sidebar client={client} userData={userData} />
         </div>
     )
 }
@@ -183,7 +184,17 @@ function LastGames({ userData }: UserDataProps) {
     )
 }
 
-function Sidebar({ userData }: UserDataProps) {
+function Sidebar({ userData, client }: { userData: UserData | null, client: APIClient }) {
+    const [modalLogoutOpen, setModalLogoutOpen] = React.useState<boolean>(false);
+
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        client.logout().then(() => {
+            navigate('/');
+        });
+    }
+
     return (
         <div className={styles.sidebar}>
             <h2>Seu saldo</h2>
@@ -207,10 +218,27 @@ function Sidebar({ userData }: UserDataProps) {
             </div>
 
             <div className={styles.sidebarBottom}>
-                <Button variant="contained" color="secondary" fullWidth>
+                <Button onClick={() => setModalLogoutOpen(true)} variant="contained" color="secondary" fullWidth>
                     Encerrar sessão
                 </Button>
             </div>
+
+            <Dialog open={modalLogoutOpen} onClose={() => setModalLogoutOpen(false)}>
+                <DialogTitle>
+                    Encerrar sessão
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>Tem certeza que deseja encerrar sua sessão?</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setModalLogoutOpen(false)} color="primary">
+                        Cancelar
+                    </Button>
+                    <Button onClick={handleLogout} color="secondary">
+                        Encerrar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }
