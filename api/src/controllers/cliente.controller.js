@@ -3,7 +3,6 @@ const argon2 = require('argon2');
 
 exports.getAllClientes = async (req, res) => {
     const {rows} =  await db.query("SELECT * FROM cliente");
-    console.log(rows);
 
     res.status(200).send({
         success: true,
@@ -18,7 +17,6 @@ exports.getCliente = async(req, res) => {
         "SELECT * FROM cliente WHERE nome ILIKE $1 OR cpf = $2",
         [`%${searchParam}%`, searchParam]
     );
-    console.log(rows);
     
     if(!rows){
         res.status(404).send({
@@ -161,4 +159,37 @@ exports.updateCliente = async(req, res, next) => {
     }
 
     next();
+}
+
+exports.verificarClienteNovo = async (req, res) => {
+    const cpf = req.query.cpf;
+
+    let {rows} = await db.query("SELECT nome FROM cliente WHERE cpf = $1", [cpf]);
+
+    if(rows.length == 0){
+        res.status(404).send({
+            success: false,
+            message: "Esse cliente não existe"
+        });
+        return;
+    }
+
+    ({rows} = await db.query("SELECT c.nome FROM sessao s JOIN cliente c ON (s.cliente = c.cpf) WHERE c.cpf = $1", [cpf]));
+
+    if(rows.length == 0){
+        res.status(200).send({
+            success: true,
+            data: { novo: true }, // é cliente novo
+            message: "CPF " + cpf + " ainda não possui sessões"
+        });
+        return;
+    }
+    else{
+        res.status(200).send({
+            success: true,
+            data: { novo: false }, // não é cliente novo
+            message: "CPF " + cpf + " já possui sessões"
+        });
+        return;
+    }
 }
