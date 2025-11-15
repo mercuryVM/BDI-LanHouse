@@ -5,7 +5,7 @@ exports.getSessoes = async (req, res) => {
     const params = [];
     let paramCount = 0;
 
-    let query = "SELECT * FROM sessao WHERE 1=1";
+    let query = "SELECT * FROM sessao JOIN cliente ON cliente = cpf WHERE 1=1";
 
     if (cliente) {
         paramCount++;
@@ -59,7 +59,8 @@ exports.getSessoes = async (req, res) => {
                 dateTimeInicio: row.datetimeinicio,
                 dateTimeFim: row.datetimefim,
                 motivotermino: row.motivotermino,
-                maquina: row.maquina
+                maquina: row.maquina,
+                nome: row.nome,
             }
         })
 
