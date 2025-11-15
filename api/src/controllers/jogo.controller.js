@@ -239,8 +239,8 @@ exports.getMostPlayedJogos = async (req, res) => {
         FROM sessoes_por_jogo spj
         JOIN pico_horario ph ON spj.jogo_id = ph.jogo
         WHERE ph.rn = 1      
-        ORDER BY spj.numero_sessoes DESC;
-        LIMIT 10
+        ORDER BY spj.numero_sessoes DESC
+        LIMIT 10;
         `
     );
 
