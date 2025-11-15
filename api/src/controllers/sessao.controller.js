@@ -4,7 +4,7 @@ exports.getSessoes = async (req, res) => {
     const { cliente, datetimeinicio, duracao, maquina, ativa } = req.query;
     const params = [];
     let paramCount = 0;
-    
+
     let query = "SELECT * FROM sessao WHERE 1=1";
 
     if (cliente) {
@@ -22,7 +22,7 @@ exports.getSessoes = async (req, res) => {
     if (duracao) {
         paramCount++;
         query += ` AND (datetimefim - datetimeinicio) = $${paramCount}::interval`;
-        params.push(duracao);
+        params.push(`${duracao} minutes`);
     }
 
     if (maquina) {
