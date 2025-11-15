@@ -176,10 +176,74 @@ exports.getRecentJogos = async (req, res) => {
 }
 
 exports.getMostPlayedJogos = async (req, res) => {
+
+    //TODO: colocar datatimefim em sessaojogo (banco e cod
+    /*
+    WITH sessoes_por_jogo AS (
+    SELECT 
+        j.id AS jogo_id,
+        j.nome,
+        j.descricao,
+        j.urlimagem,
+        j.idaderecomendada,
+        j.inicializacao,
+        j.multiplayer,
+        COUNT(*) AS numero_sessoes,
+        AVG(EXTRACT(EPOCH FROM (s.datetimefim - s.datetimeinicio)) / 60) 
+            AS tempo_medio_minutos
+    FROM sessaojogo s
+    JOIN jogo j ON j.id = s.jogo
+    GROUP BY j.id
+),
+    */
+
     const { rows } = await db.query(
-        `SELECT COUNT(*) AS numeroSessoes, nome FROM sessaojogo JOIN jogo ON id = jogo GROUP BY jogo, nome`
-    ); 
-    
+        `WITH sessoes_por_jogo AS (
+            SELECT 
+                j.id AS jogo_id,
+                j.nome,
+                j.descricao,
+                j.urlimagem,
+                j.idaderecomendada,
+                j.inicializacao,
+                j.multiplayer,
+                COUNT(*) AS numero_sessoes
+            FROM sessaojogo s
+            JOIN jogo j ON j.id = s.jogo
+            GROUP BY j.id
+        ),
+
+        pico_horario AS (
+            SELECT 
+                s.jogo,
+                EXTRACT(HOUR FROM s.datetimeinicio) AS hora,
+                COUNT(*) AS total_na_hora,
+                ROW_NUMBER() OVER (
+                    PARTITION BY s.jogo 
+                    ORDER BY COUNT(*) DESC
+                ) AS rn
+            FROM sessaojogo s
+            GROUP BY s.jogo, hora
+        )
+
+        SELECT 
+            spj.numero_sessoes AS numerosessoes,
+            ph.hora AS pico_hora,
+            spj.jogo_id AS jogo_id,
+            spj.nome AS jogo_nome,
+            spj.descricao AS jogo_descricao,
+            spj.urlimagem AS jogo_urlimagem,
+            spj.idaderecomendada AS jogo_idaderecomendada,
+            spj.inicializacao AS jogo_inicializacao,
+            spj.multiplayer AS jogo_multiplayer
+        FROM sessoes_por_jogo spj
+        JOIN pico_horario ph ON spj.jogo_id = ph.jogo
+        WHERE ph.rn = 1      
+        ORDER BY spj.numero_sessoes DESC
+        LIMIT 10;
+        `
+    );
+
     res.status(200).send({
         success: true,
         message: "Jogos consultado com sucesso!",
@@ -192,7 +256,8 @@ exports.getMostPlayedJogos = async (req, res) => {
                 idadeRecomendada: row.jogo_idaderecomendada,
                 inicializacao: row.jogo_inicializacao,
                 multiplayer: row.jogo_multiplayer,
-                numeroSessoes: row.numerosessoes
+                numeroSessoes: row.numerosessoes,
+                picoHora: row.pico_hora
             }
         })
 
