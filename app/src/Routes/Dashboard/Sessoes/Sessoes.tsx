@@ -22,6 +22,7 @@ import {
     InputAdornment
 } from "@mui/material";
 import { Person, AccessTime, Schedule, Search, FilterList, CheckCircle, PlayArrow } from "@mui/icons-material";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function Sessoes({ client }: { client: APIClient, userData: UserData | null }) {
     const [sessoes, setSessoes] = useState<Sessao[]>([]);
@@ -95,87 +96,123 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
     return (
         <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', overflow: 'auto' }}>
             <Box>
-                <Typography variant="h4" component="h1" gutterBottom>
-                    <FilterList sx={{ fontSize: 32, verticalAlign: "middle", mr: 1 }} />
-                    Sessões
-                </Typography>
+                <motion.div
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <Typography variant="h4" component="h1" gutterBottom>
+                        <FilterList sx={{ fontSize: 32, verticalAlign: "middle", mr: 1 }} />
+                        Sessões
+                    </Typography>
+                </motion.div>
                 
                 {/* Barra de Busca */}
-                <TextField
-                    fullWidth
-                    size="small"
-                    placeholder="Buscar por nome ou CPF do cliente..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <Search />
-                            </InputAdornment>
-                        ),
-                    }}
-                    sx={{ mb: 2 }}
-                />
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1, duration: 0.4 }}
+                >
+                    <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Buscar por nome ou CPF do cliente..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Search />
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{ mb: 2 }}
+                    />
+                </motion.div>
 
                 {/* Filtros Compactos */}
-                <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
-                    {/* Filtro de Status */}
-                    <ToggleButtonGroup
-                        value={statusFilter}
-                        exclusive
-                        onChange={(_e, value) => setStatusFilter(value)}
-                        size="small"
-                    >
-                        <ToggleButton value="ativa">
-                            <PlayArrow fontSize="small" sx={{ mr: 0.5 }} /> Ativas
-                        </ToggleButton>
-                        <ToggleButton value="encerrada">
-                            <CheckCircle fontSize="small" sx={{ mr: 0.5 }} /> Encerradas
-                        </ToggleButton>
-                    </ToggleButtonGroup>
-
-                    <Box flex={1} />
-
-                    {/* Contador */}
-                    <Typography variant="body2" color="text.secondary">
-                        {filteredSessoes.length} sess{filteredSessoes.length !== 1 ? 'ões' : 'ão'}
-                    </Typography>
-
-                    {/* Botão Limpar */}
-                    {(searchQuery || statusFilter) && (
-                        <Button
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.4 }}
+                >
+                    <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
+                        {/* Filtro de Status */}
+                        <ToggleButtonGroup
+                            value={statusFilter}
+                            exclusive
+                            onChange={(_e, value) => setStatusFilter(value)}
                             size="small"
-                            onClick={() => {
-                                setSearchQuery("");
-                                setStatusFilter(null);
-                            }}
                         >
-                            Limpar
-                        </Button>
-                    )}
-                </Box>
+                            <ToggleButton value="ativa">
+                                <PlayArrow fontSize="small" sx={{ mr: 0.5 }} /> Ativas
+                            </ToggleButton>
+                            <ToggleButton value="encerrada">
+                                <CheckCircle fontSize="small" sx={{ mr: 0.5 }} /> Encerradas
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+
+                        <Box flex={1} />
+
+                        {/* Contador */}
+                        <Typography variant="body2" color="text.secondary">
+                            {filteredSessoes.length} sess{filteredSessoes.length !== 1 ? 'ões' : 'ão'}
+                        </Typography>
+
+                        {/* Botão Limpar */}
+                        <AnimatePresence>
+                            {(searchQuery || statusFilter) && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    <Button
+                                        size="small"
+                                        onClick={() => {
+                                            setSearchQuery("");
+                                            setStatusFilter(null);
+                                        }}
+                                    >
+                                        Limpar
+                                    </Button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </Box>
+                </motion.div>
             </Box>
 
-            <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
-                <Table sx={{ minWidth: 650 }}>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Cliente</TableCell>
-                            <TableCell align="center">Máquina</TableCell>
-                            <TableCell align="center">Início</TableCell>
-                            <TableCell align="center">Fim</TableCell>
-                            <TableCell align="center">Duração</TableCell>
-                            <TableCell align="center">Status</TableCell>
-                            <TableCell align="center">Motivo Término</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {filteredSessoes.map((sessao, index) => (
-                            <TableRow
-                                key={index}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                hover
-                            >
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+            >
+                <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
+                    <Table sx={{ minWidth: 650 }}>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Cliente</TableCell>
+                                <TableCell align="center">Máquina</TableCell>
+                                <TableCell align="center">Início</TableCell>
+                                <TableCell align="center">Fim</TableCell>
+                                <TableCell align="center">Duração</TableCell>
+                                <TableCell align="center">Status</TableCell>
+                                <TableCell align="center">Motivo Término</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                                {filteredSessoes.map((sessao, index) => (
+                                    <TableRow
+                                        key={`${sessao.cliente.cpf}_${sessao.dateTimeInicio}`}
+                                        component={motion.tr}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.05, duration: 0.3 }}
+                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                        hover
+                                    >
                                 <TableCell component="th" scope="row">
                                     <Box display="flex" alignItems="center" gap={1}>
                                         <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
@@ -257,6 +294,7 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
                     </TableBody>
                 </Table>
             </TableContainer>
+            </motion.div>
         </Box>
     );
 }
