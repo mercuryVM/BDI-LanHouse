@@ -42,6 +42,8 @@ export interface Game {
     urlImagem: string;
     inicializacao: string;
     plataformas: string[];
+    numeroSessoes?: number;
+    picoHora?: number;
 }
 
 export interface Cliente {

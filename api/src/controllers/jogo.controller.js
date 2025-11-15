@@ -227,9 +227,9 @@ exports.getMostPlayedJogos = async (req, res) => {
         )
 
         SELECT 
-            spj.numero_sessoes,
+            spj.numero_sessoes AS numerosessoes,
             ph.hora AS pico_hora,
-            spj.jogo_id,
+            spj.jogo_id AS jogo_id,
             spj.nome AS jogo_nome,
             spj.descricao AS jogo_descricao,
             spj.urlimagem AS jogo_urlimagem,

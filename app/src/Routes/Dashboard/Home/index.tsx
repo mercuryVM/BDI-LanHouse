@@ -210,7 +210,13 @@ function MostPlayedGames({ client }: { client: APIClient }) {
                     }
                     {
                         mostPlayedGames && mostPlayedGames.map(game => (
-                            <GameCard key={game.id} game={game} disabled={false} />
+                            <GameCard 
+                                key={game.id} 
+                                game={game} 
+                                disabled={false}
+                                numeroSessoes={game.numeroSessoes}
+                                picoHora={game.picoHora}
+                            />
                         ))
                     }
                 </animated.div>
