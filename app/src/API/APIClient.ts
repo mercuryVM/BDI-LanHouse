@@ -43,6 +43,20 @@ export interface Game {
     plataformas: string[];
 }
 
+export interface Cliente {
+    cpf: string;
+    nome: string;
+    loginacesso: string;
+    genero: string;
+    datanasc: Date;
+    endereco: string;
+    vip: boolean;
+    datafimvip: Date | null;
+    tempocomputador: number;
+    tempoconsole: number;
+    temposimulador: number;
+}
+
 export default class APIClient {
     client: AxiosInstance;
     userData: UserData | null = null;
@@ -163,6 +177,41 @@ export default class APIClient {
         try {
             const jogos = await this.get<Game[]>('/getRecentJogos');
             return jogos;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getAllClientes(): Promise<Cliente[]> {
+        try {
+            const clientes = await this.get<Cliente[]>('/getAllClientes');
+            return clientes;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async updateCliente(cpf: string, updates: Partial<Cliente>): Promise<Cliente> {
+        try {
+            const updatedCliente = await this.put<Cliente>(`/updateCliente?search=${cpf}`, updates);
+            return updatedCliente;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async createCliente(novoCliente: Omit<Cliente, 'tempocomputador' | 'tempoconsole' | 'temposimulador'>): Promise<Cliente> {
+        try {
+            const createdCliente = await this.post<Cliente>('/createCliente', novoCliente);
+            return createdCliente;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async deleteCliente(cpf: string): Promise<void> {
+        try {
+            await this.post<void>('/deleteCliente', { cpf });
         } catch (error) {
             throw this.handleError(error);
         }
