@@ -33,8 +33,10 @@ import {
     DialogContent,
     DialogActions
 } from "@mui/material";
-import { Person, Star, SportsEsports, Computer, SportsBasketball, Close, Save, Edit, Add, Delete } from "@mui/icons-material";
+import { Person, Star, SportsEsports, Computer, SportsBasketball, Close, Save, Edit, Add, Delete, Search, FilterList } from "@mui/icons-material";
 import styles from "./index.module.css";
+import { useMemo } from "react";
+import { InputAdornment, ToggleButtonGroup, ToggleButton } from "@mui/material";
 
 export function Clientes({ client }: { client: APIClient, userData: UserData | null }) {
     const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -46,6 +48,9 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
     const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" as "success" | "error" });
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [vipFilter, setVipFilter] = useState<string | null>(null);
+    const [genderFilter, setGenderFilter] = useState<string | null>(null);
     const [newCliente, setNewCliente] = useState({
         cpf: '',
         nome: '',
@@ -87,6 +92,33 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
         const mins = minutos % 60;
         return `${horas}h ${mins}m`;
     };
+
+    const filteredClientes = useMemo(() => {
+        let filtered = [...clientes];
+
+        // Filtro de busca
+        if (searchQuery) {
+            filtered = filtered.filter(cliente => 
+                cliente.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                cliente.cpf.includes(searchQuery) ||
+                cliente.loginacesso.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        // Filtro VIP
+        if (vipFilter === 'vip') {
+            filtered = filtered.filter(cliente => cliente.vip);
+        } else if (vipFilter === 'regular') {
+            filtered = filtered.filter(cliente => !cliente.vip);
+        }
+
+        // Filtro de Gênero
+        if (genderFilter) {
+            filtered = filtered.filter(cliente => cliente.genero === genderFilter);
+        }
+
+        return filtered;
+    }, [clientes, searchQuery, vipFilter, genderFilter]);
 
     const handleClienteClick = (cliente: Cliente) => {
         setSelectedCliente(cliente);
@@ -229,15 +261,85 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
 
     return (
         <div className={styles.container}>
-            <div className={styles.header}>
+            <Box className={styles.header}>
                 <Typography variant="h4" component="h1" gutterBottom>
-                    <Person sx={{ fontSize: 32, verticalAlign: "middle", mr: 1 }} />
+                    <FilterList sx={{ fontSize: 32, verticalAlign: "middle", mr: 1 }} />
                     Clientes
                 </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Total de {clientes.length} cliente{clientes.length !== 1 ? 's' : ''} cadastrado{clientes.length !== 1 ? 's' : ''}
-                </Typography>
-            </div>
+                
+                {/* Barra de Busca */}
+                <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Buscar por nome, CPF ou login..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Search />
+                            </InputAdornment>
+                        ),
+                    }}
+                    sx={{ mb: 2 }}
+                />
+
+                {/* Filtros Compactos */}
+                <Box display="flex" gap={2} flexWrap="wrap" alignItems="center" mb={2}>
+                    {/* Filtro VIP */}
+                    <ToggleButtonGroup
+                        value={vipFilter}
+                        exclusive
+                        onChange={(_e, value) => setVipFilter(value)}
+                        size="small"
+                    >
+                        <ToggleButton value="vip">
+                            <Star fontSize="small" sx={{ mr: 0.5 }} /> VIP
+                        </ToggleButton>
+                        <ToggleButton value="regular">
+                            Regular
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+
+                    <Box sx={{ borderLeft: 1, borderColor: 'divider', height: 30, mx: 1 }} />
+
+                    {/* Filtro de Gênero */}
+                    <ToggleButtonGroup
+                        value={genderFilter}
+                        exclusive
+                        onChange={(_e, value) => setGenderFilter(value)}
+                        size="small"
+                    >
+                        <ToggleButton value="M">
+                            Masculino
+                        </ToggleButton>
+                        <ToggleButton value="F">
+                            Feminino
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+
+                    <Box flex={1} />
+
+                    {/* Contador */}
+                    <Typography variant="body2" color="text.secondary">
+                        {filteredClientes.length} cliente{filteredClientes.length !== 1 ? 's' : ''}
+                    </Typography>
+
+                    {/* Botão Limpar */}
+                    {(searchQuery || vipFilter || genderFilter) && (
+                        <Button
+                            size="small"
+                            onClick={() => {
+                                setSearchQuery("");
+                                setVipFilter(null);
+                                setGenderFilter(null);
+                            }}
+                        >
+                            Limpar
+                        </Button>
+                    )}
+                </Box>
+            </Box>
 
             <TableContainer component={Paper} className={styles.tableContainer}>
                 <Table sx={{ minWidth: 650 }}>
@@ -254,7 +356,7 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {clientes.map((cliente) => (
+                        {filteredClientes.map((cliente) => (
                             <TableRow
                                 key={cliente.cpf}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}
