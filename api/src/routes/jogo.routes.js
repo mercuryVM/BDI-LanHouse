@@ -6,6 +6,7 @@ router.post('/jogo', authMiddleware, authRequireType(['funcionario']), jogoContr
 router.get('/jogo', authMiddleware, jogoController.getJogo);
 router.get('/getAllJogos', authMiddleware, jogoController.getAllJogos);
 router.get('/getRecentJogos', authMiddleware, authRequireType(['cliente']), jogoController.getRecentJogos);
+router.get('/getMostPlayedJogos', authMiddleware, authRequireType(['funcionario']), jogoController.getMostPlayedJogos);
 router.delete('/jogo', authMiddleware, authRequireType(['funcionario']), jogoController.deleteJogo);
 router.put('/jogo', authMiddleware, authRequireType(['funcionario']), jogoController.updateJogo, jogoController.getJogo);
 
