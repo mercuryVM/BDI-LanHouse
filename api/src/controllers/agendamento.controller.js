@@ -1,11 +1,24 @@
 const db = require("../config/database");
 
 exports.createAgendamento = async (req, res) => {
-    const { id, datetimeinicio, datetimefim } = req.body;
+    const { id, datetimeinicio, datetimefim, tipo, eventoCliente, manutencaoTipo, manutencaoPrioridade } = req.body;
     await db.query(
         "INSERT INTO agendamento (id, datetimeinicio, datetimefim) VALUES ($1, $2, $3)",
         [id, datetimeinicio, datetimefim]
     );
+
+    if (tipo == 'manutencao') {
+        await db.query(
+            "INSERT INTO manutencao (id, tipo, prioridade) VALUES ($1, $2, $3)",
+            [id, manutencaoTipo, manutencaoPrioridade]
+        );
+    }
+    else if (tipo == 'evento'){
+        await db.query(
+            "INSERT INTO evento (id, cliente) VALUES ($1, $2)",
+            [id, eventoCliente]
+        );
+    }
     res.status(201).send({
         success: true,
         message: "Agendamento adicionado com sucesso!",
@@ -16,7 +29,7 @@ exports.createAgendamento = async (req, res) => {
 };
 
 exports.getAgendamento = async (req, res) => {
-    const { id } = req.query; 
+    const { id } = req.query;
     const { rows } = await db.query(
         "SELECT rg, datetimeinicio, datetimefim FROM agendamento WHERE id = $1",
         [id]
@@ -44,7 +57,7 @@ exports.getAgendamento = async (req, res) => {
 };
 
 exports.deleteAgendamento = async (req, res) => {
-    const { id } = req.query; 
+    const { id } = req.query;
     const { rows } = await db.query(
         "DELETE FROM agendamento WHERE id = $1",
         [id]
@@ -57,7 +70,7 @@ exports.deleteAgendamento = async (req, res) => {
 };
 
 exports.updateAgendamento = async (req, res, next) => {
-    const { id } = req.query; 
+    const { id } = req.query;
 
     const camposPermitidos = ['datetimeinicio', 'datetimefim'];
     const campos = [];

@@ -14,6 +14,7 @@ const clienteRoute = require('./routes/cliente.routes');
 const maquinaRoute = require('./routes/maquina.routes');
 const sessaoRoute = require('./routes/sessao.routes');
 const pacoteRoute = require('./routes/pacote.routes');
+const manutencaoRoute = require('./routes/manutencao.routes')
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -29,5 +30,6 @@ app.use('/api/', clienteRoute);
 app.use('/api/', maquinaRoute);
 app.use('/api/', sessaoRoute);
 app.use('/api/', pacoteRoute)
+app.use('/api/', manutencaoRoute)
 
 module.exports = app;
