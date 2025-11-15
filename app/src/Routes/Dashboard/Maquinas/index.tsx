@@ -159,7 +159,7 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
     }
 
     return (
-        <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 3, height: '100%', overflow: 'auto' }}>
+        <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 3, height: '100%', overflow: 'hidden' }}>
             {/* Header */}
             <Box>
                 <motion.div
@@ -304,9 +304,10 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
+                style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
             >
-                <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
-                    <Table sx={{ minWidth: 650 }}>
+                <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3, flex: 1, overflow: 'auto' }}>
+                    <Table sx={{ minWidth: 650 }} stickyHeader>
                         <TableHead>
                             <TableRow>
                                 <TableCell>ID</TableCell>
@@ -597,13 +598,13 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                                 </TableHead>
                                                 <TableBody>
                                                     {sessoes.map((sessao, index) => {
-                                                        const inicio = new Date(sessao.dateTimeInicio);
-                                                        const fim = sessao.dateTimeFim ? new Date(sessao.dateTimeFim) : null;
+                                                        const inicio = new Date(sessao.datatempoinicio);
+                                                        const fim = sessao.datatempofim ? new Date(sessao.datatempofim) : null;
                                                         const isActive = !fim;
                                                         
                                                         return (
                                                             <TableRow
-                                                                key={sessao.cliente.cpf + "" + sessao.dateTimeInicio}
+                                                                key={sessao.cliente.cpf + "" + sessao.datatempoinicio}
                                                                 component={motion.tr}
                                                                 initial={{ opacity: 0, x: -10 }}
                                                                 animate={{ opacity: 1, x: 0 }}

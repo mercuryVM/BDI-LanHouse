@@ -1,7 +1,7 @@
 const db = require("../config/database");
 
 exports.getSessoes = async (req, res) => {
-    const { cliente, datetimeinicio, duracao, maquina, ativa } = req.query;
+    const { cliente, datatempoinicio, duracao, maquina, ativa } = req.query;
     const params = [];
     let paramCount = 0;
 
@@ -13,15 +13,15 @@ exports.getSessoes = async (req, res) => {
         params.push(cliente);
     }
 
-    if (datetimeinicio) {
+    if (datatempoinicio) {
         paramCount++;
-        query += ` AND datetimeinicio = $${paramCount}`;
-        params.push(datetimeinicio);
+        query += ` AND datatempoinicio = $${paramCount}`;
+        params.push(datatempoinicio);
     }
 
     if (duracao) {
         paramCount++;
-        query += ` AND (datetimefim - datetimeinicio) = $${paramCount}::interval`;
+        query += ` AND (datatempofim - datatempoinicio) = $${paramCount}::interval`;
         params.push(`${duracao} minutes`);
     }
 
@@ -33,13 +33,13 @@ exports.getSessoes = async (req, res) => {
 
     if (ativa !== undefined) {
         if (ativa === 'true' || ativa === true) {
-            query += ` AND datetimefim IS NULL`;
+            query += ` AND datatempofim IS NULL`;
         } else {
-            query += ` AND datetimefim IS NOT NULL`;
+            query += ` AND datatempofim IS NOT NULL`;
         }
     }
 
-    query += " ORDER BY datetimefim NULLS FIRST";
+    query += " ORDER BY datatempofim NULLS FIRST";
 
     const { rows } = await db.query(query, params);
 
@@ -60,8 +60,8 @@ exports.getSessoes = async (req, res) => {
                     cpf: row.cliente,
                     nome: row.nome,
                 },
-                dateTimeInicio: row.datetimeinicio,
-                dateTimeFim: row.datetimefim,
+                datatempoinicio: row.datatempoinicio,
+                datatempofim: row.datatempofim,
                 motivotermino: row.motivotermino,
                 maquina: {
                     id: row.maquina,

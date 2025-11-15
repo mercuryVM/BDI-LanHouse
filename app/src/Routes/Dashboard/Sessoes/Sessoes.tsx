@@ -77,9 +77,9 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
 
         // Filtro de status
         if (statusFilter === 'ativa') {
-            filtered = filtered.filter(sessao => !sessao.dateTimeFim);
+            filtered = filtered.filter(sessao => !sessao.datatempofim);
         } else if (statusFilter === 'encerrada') {
-            filtered = filtered.filter(sessao => sessao.dateTimeFim);
+            filtered = filtered.filter(sessao => sessao.datatempofim);
         }
 
         return filtered;
@@ -94,7 +94,7 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
     }
 
     return (
-        <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', overflow: 'auto' }}>
+        <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', overflow: 'hidden' }}>
             <Box>
                 <motion.div
                     initial={{ opacity: 0, x: -30 }}
@@ -188,9 +188,10 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
+                style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
             >
-                <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
-                    <Table sx={{ minWidth: 650 }}>
+                <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3, flex: 1, overflow: 'auto' }}>
+                    <Table sx={{ minWidth: 650 }} stickyHeader>
                         <TableHead>
                             <TableRow>
                                 <TableCell>Cliente</TableCell>
@@ -205,7 +206,7 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
                         <TableBody>
                                 {filteredSessoes.map((sessao, index) => (
                                     <TableRow
-                                        key={`${sessao.cliente.cpf}_${sessao.dateTimeInicio}`}
+                                        key={`${sessao.cliente.cpf}_${sessao.datatempoinicio}`}
                                         component={motion.tr}
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
@@ -240,16 +241,16 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
                                     <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
                                         <Schedule fontSize="small" color="action" />
                                         <Typography variant="body2">
-                                            {formatDateTime(sessao.dateTimeInicio)}
+                                            {formatDateTime(sessao.datatempoinicio)}
                                         </Typography>
                                     </Box>
                                 </TableCell>
                                 <TableCell align="center">
-                                    {sessao.dateTimeFim ? (
+                                    {sessao.datatempofim ? (
                                         <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
                                             <Schedule fontSize="small" color="action" />
                                             <Typography variant="body2">
-                                                {formatDateTime(sessao.dateTimeFim)}
+                                                {formatDateTime(sessao.datatempofim)}
                                             </Typography>
                                         </Box>
                                     ) : (
@@ -262,12 +263,12 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
                                     <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
                                         <AccessTime fontSize="small" color="action" />
                                         <Typography variant="body2">
-                                            {calculateDuration(sessao.dateTimeInicio, sessao.dateTimeFim)}
+                                            {calculateDuration(sessao.datatempoinicio, sessao.datatempofim)}
                                         </Typography>
                                     </Box>
                                 </TableCell>
                                 <TableCell align="center">
-                                    {sessao.dateTimeFim ? (
+                                    {sessao.datatempofim ? (
                                         <Chip label="Encerrada" size="small" color="default" variant="outlined" />
                                     ) : (
                                         <Chip label="Ativa" size="small" color="success" />

@@ -7,7 +7,7 @@ exports.getManutencao = async (req, res) => {
             m.id AS manutencaoID,
             m.tipo AS manutencaoTipo,
             m.prioridade AS manutencaoPrioridade,
-            a.datetimeinicio AS manutencaoDateTimeInicio,
+            a.datatempoinicio AS manutencaodatatempoinicio,
             maq.id AS maquinaID, 
             p.nome as nomePlat, 
             p.tipo as tipoPlat,
@@ -38,7 +38,7 @@ exports.getManutencao = async (req, res) => {
                 manutencaoID: manutencao.manutencaoID,
                 manutencaoTipo: manutencao.manutencaoTipo,
                 manutecaoPrioridade: manutencao.manutecaoPrioridade,
-                manutencaoDateTimeInicio: manutencao.manutencaoDateTimeInicio,
+                manutencaodatatempoinicio: manutencao.manutencaodatatempoinicio,
                 maquinaID: manutencao.maquinaID,
                 nomePlat: manutencao.nomePlat,
                 tipoPlat: manutencao.tipoPlat,
@@ -57,7 +57,7 @@ exports.getManutencoes = async (req, res) => {
             m.id AS manutencaoID,
             m.tipo AS manutencaoTipo,
             m.prioridade AS manutencaoPrioridade,
-            a.datetimeinicio AS manutencaoDateTimeInicio,
+            a.datatempoinicio AS manutencaodatatempoinicio,
             maq.id AS maquinaID, 
             p.nome as nomePlat, 
             p.tipo as tipoPlat,
@@ -86,12 +86,12 @@ exports.getManutencoes = async (req, res) => {
         const dias = parseInt(periodo);
         if (!isNaN(dias) && dias > 0) {
             paramCount++;
-            query += ` AND a.datetimeinicio::date BETWEEN CURRENT_DATE AND CURRENT_DATE + $${paramCount}::INTERVAL`;
+            query += ` AND a.datatempoinicio::date BETWEEN CURRENT_DATE AND CURRENT_DATE + $${paramCount}::INTERVAL`;
             params.push(`${dias} days`);
         }
     }
 
-    query += " ORDER BY a.datetimeinicio NULLS FIRST";
+    query += " ORDER BY a.datatempoinicio NULLS FIRST";
 
     const { rows } = await db.query(query, params);
 
@@ -110,7 +110,7 @@ exports.getManutencoes = async (req, res) => {
                 manutencaoID: row.manutencaoID,
                 manutencaoTipo: row.manutencaoTipo,
                 manutecaoPrioridade: row.manutecaoPrioridade,
-                manutencaoDateTimeInicio: row.manutencaoDateTimeInicio,
+                manutencaodatatempoinicio: row.manutencaodatatempoinicio,
                 maquinaID: row.maquinaID,
                 nomePlat: row.nomePlat,
                 tipoPlat: row.tipoPlat,
