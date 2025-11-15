@@ -3,12 +3,15 @@ import styles from "./index.module.css";
 import { useCallback, useState } from "react";
 import { useNavigate, type NavigateFunction } from "react-router";
 import type APIClient from "../../API/APIClient";
+import { useMaquinaId } from "../../Hooks/useMaquinaId";
 
 export default function Home({ client }: { client: APIClient }) {
     const [error, setError] = useState<string | null>(null);
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
+
+    const maquinaId = useMaquinaId();
 
     const navigate: NavigateFunction = useNavigate();
 
@@ -48,7 +51,7 @@ export default function Home({ client }: { client: APIClient }) {
                         Computador
                     </Typography>
                     <Box sx={{ borderRadius: "50%", bgcolor: "primary.main", height: 96, fontSize: 52, aspectRatio: 1, margin: "0 auto", mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        00
+                        {maquinaId ? maquinaId : <CircularProgress color="inherit" />}
                     </Box>
                     <TextField error={!!error} fullWidth label="Usuário" variant="outlined" value={username} onChange={(e) => setUsername(e.target.value)} />
                     <TextField
