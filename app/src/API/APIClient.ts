@@ -29,7 +29,7 @@ export interface Pacote {
     pacid: number;
     pacId: number;
     preco: number;
-    data: string;
+    datatempo: string;
     cpf: string;
     clinome: string;
     pacnome: string;

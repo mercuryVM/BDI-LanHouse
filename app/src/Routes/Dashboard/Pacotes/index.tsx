@@ -377,10 +377,10 @@ export function Pacotes({ client }: { client: APIClient, userData: UserData | nu
                         <TableBody>
                             {filteredPacotes.map((pacote, index) => {
                                 const isVip = getPacoteTipo(pacote) === 'vip';
-                                const dataCompra = new Date(pacote.data);
+                                const dataCompra = new Date(pacote.datatempo);
                                 return (
                                     <TableRow
-                                        key={pacote.pacid + "" + pacote.cpf + pacote.data}
+                                        key={pacote.pacid + "" + pacote.cpf + pacote.datatempo}
                                         component={motion.tr}
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}

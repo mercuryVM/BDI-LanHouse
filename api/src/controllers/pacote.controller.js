@@ -45,13 +45,13 @@ exports.getAllPacotes = async (req, res) => {
 
 exports.getAllClientePacotes = async (req, res) => {
     const { rows } = await db.query(
-        "SELECT c.cpf, p.id as pacId, cp.data, c.nome as cliNome, p.nome as pacNome, p.preco, o.tempocomputador, o.tempoconsole, o.temposimulador, pv.tempoadicionar " +
+        "SELECT c.cpf, p.id as pacId, cp.datatempo, c.nome as cliNome, p.nome as pacNome, p.preco, o.tempocomputador, o.tempoconsole, o.temposimulador, pv.tempoadicionar " +
         "FROM clientePacote cp " +
         "INNER JOIN cliente c ON (cp.cliente = c.cpf) " +
         "INNER JOIN pacote p ON (cp.pacote = p.id) " +
         "LEFT JOIN ordinario o ON (cp.pacote = o.id) " +
         "LEFT JOIN pacotevip pv ON (cp.pacote = pv.id) " +
-        "ORDER BY data DESC"
+        "ORDER BY datatempo DESC"
     );
 
     res.status(200).send({
@@ -188,7 +188,7 @@ exports.createClientePacote = async (req, res) => {
 
         // Inserir o registro de compra do pacote
         await client.query(
-            "INSERT INTO clientePacote (cliente, pacote, data) VALUES ($1, $2, $3)",
+            "INSERT INTO clientePacote (cliente, pacote, datatempo) VALUES ($1, $2, $3)",
             [cpf, pacoteId, data]
         );
 
