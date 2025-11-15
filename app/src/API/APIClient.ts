@@ -237,6 +237,15 @@ export default class APIClient {
         }
     }
 
+    async getMostPlayedJogos(): Promise<Game[]> {
+        try {
+            const jogos = await this.get<Game[]>('/getMostPlayedJogos');
+            return jogos;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     async getAllMaquinas(): Promise<Maquina[]> {
         try {
             const maquinas = await this.get<Maquina[]>('/getAllMaquinas');

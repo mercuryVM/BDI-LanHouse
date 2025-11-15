@@ -2,13 +2,12 @@ import type { UserData, Game } from "../../../API/APIClient";
 import type APIClient from "../../../API/APIClient";
 import styles from './index.module.css';
 import React, { useEffect } from 'react';
-import { Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Modal, Typography } from "@mui/material";
-import { AccessTime, Computer } from "@mui/icons-material";
+import { Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { AccessTime } from "@mui/icons-material";
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
 import { GameCard } from "../../../Components/GameCard";
 import { useNavigate } from "react-router";
-import { useUserDataRedux } from "../../../hooks/useUserDataRedux";
 import { useDispatch } from "react-redux";
 import { clearUserData } from "../../../store/slices/userDataSlice";
 
@@ -19,6 +18,7 @@ interface UserDataProps {
 
 export function Home({ client, userData }: { client: APIClient, userData: UserData | null }) {
     const isClient = userData?.role === 'cliente';
+    const isCLT = userData?.role === 'clt';
 
     return (
         <div style={{ display: "flex", flex: 1 }}>
@@ -26,6 +26,7 @@ export function Home({ client, userData }: { client: APIClient, userData: UserDa
                 <h2 className={styles.header}>Bem-vindo, {userData?.nome}</h2>
                 {isClient && <VIPStatus userData={userData} />}
                 {isClient && <LastGames userData={userData} client={client} />}
+                {isCLT && <MostPlayedGames client={client} />}
             </div>
 
             <Sidebar client={client} userData={userData} />
@@ -46,7 +47,7 @@ function VIPStatus({ userData }: UserDataProps) {
     )
 }
 
-function LastGames({ userData, client }: { userData: UserData | null, client: APIClient }) {
+function LastGames({ client }: { userData: UserData | null, client: APIClient }) {
     const [lastGames, setLastGames] = React.useState<Game[] | null>(null);
 
     const [{ x }, api] = useSpring(() => ({ x: 0 }));
@@ -54,6 +55,8 @@ function LastGames({ userData, client }: { userData: UserData | null, client: AP
     const containerRef = React.useRef<HTMLDivElement>(null);
 
     const bind = useDrag(({ down, movement: [mx], velocity: [vx], first }) => {
+        if (!lastGames) return;
+
         // Calcula o scroll máximo dinamicamente
         const containerWidth = containerRef.current?.offsetWidth || 800;
         const cardWidth = 180 + 16; // minWidth + gap
@@ -121,7 +124,93 @@ function LastGames({ userData, client }: { userData: UserData | null, client: AP
                     }
                     {
                         lastGames && lastGames.map(game => (
-                            <GameCard key={game.id} game={game} />
+                            <GameCard key={game.id} game={game} disabled={false} />
+                        ))
+                    }
+                </animated.div>
+            </div>
+        </div>
+    )
+}
+
+function MostPlayedGames({ client }: { client: APIClient }) {
+    const [mostPlayedGames, setMostPlayedGames] = React.useState<Game[] | null>(null);
+
+    const [{ x }, api] = useSpring(() => ({ x: 0 }));
+    const initialX = React.useRef(0);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    const bind = useDrag(({ down, movement: [mx], velocity: [vx], first }) => {
+        if (!mostPlayedGames) return;
+
+        // Calcula o scroll máximo dinamicamente
+        const containerWidth = containerRef.current?.offsetWidth || 800;
+        const cardWidth = 180 + 16; // minWidth + gap
+        const totalWidth = mostPlayedGames.length * cardWidth;
+        const maxScroll = Math.max(0, totalWidth - containerWidth);
+
+        if (first) {
+            // Salva a posição inicial quando começa o drag
+            initialX.current = x.get();
+        }
+
+        let newX;
+        if (down) {
+            // Durante o drag, adiciona o movimento à posição inicial do drag
+            newX = initialX.current + mx;
+        } else {
+            // Quando solta, aplica a inércia
+            newX = x.get() + vx * 100;
+        }
+
+        // Aplica os limites
+        newX = Math.min(0, Math.max(-maxScroll, newX));
+
+        api.start({
+            x: newX,
+            immediate: down,
+            config: { tension: 300, friction: 30 }
+        });
+    });
+
+    useEffect(() => {
+        if (client) {
+            client.getMostPlayedJogos().then(games => {
+                setMostPlayedGames(games);
+            });
+        }
+    }, [client])
+
+    return (
+        <div>
+            <h3>Jogos Mais Jogados</h3>
+            <div
+                {...bind()}
+                ref={containerRef}
+                className={styles.gamesViewport}
+                style={{
+                    overflow: 'hidden',
+                    cursor: 'grab',
+                    touchAction: 'pan-y'
+                }}
+            >
+                <animated.div
+                    className={styles.gamesGrid}
+                    style={{
+                        transform: x.to(x => `translateX(${x}px)`),
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: '16px'
+                    }}
+                >
+                    {
+                        !mostPlayedGames && (
+                            <CircularProgress />
+                        )
+                    }
+                    {
+                        mostPlayedGames && mostPlayedGames.map(game => (
+                            <GameCard key={game.id} game={game} disabled={false} />
                         ))
                     }
                 </animated.div>
