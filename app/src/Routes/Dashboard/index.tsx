@@ -12,6 +12,7 @@ import { useUserDataRedux } from "../../hooks/useUserDataRedux";
 import { Game } from "./Game";
 import { Clientes } from "./Clientes";
 import { Sessoes } from "./Sessoes/Sessoes";
+import { Maquinas } from "./Maquinas";
 
 
 const tabs = [
@@ -40,7 +41,8 @@ const tabs = [
     {
         label: "Máquinas",
         icon: <MaquinasIcon />,
-        permission: 'clt'
+        permission: 'clt',
+        renderer: Maquinas
     },
     {
         label: "Compras",
