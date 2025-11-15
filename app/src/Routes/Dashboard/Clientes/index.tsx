@@ -261,7 +261,7 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
     }
 
     return (
-        <div className={styles.container}>
+        <div className={styles.container} style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <Box className={styles.header}>
                 <motion.div
                     initial={{ opacity: 0, x: -30 }}
@@ -373,9 +373,10 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
+                style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
             >
-                <TableContainer component={Paper} className={styles.tableContainer}>
-                <Table sx={{ minWidth: 650 }}>
+                <TableContainer component={Paper} className={styles.tableContainer} sx={{ flex: 1, overflow: 'auto' }}>
+                <Table sx={{ minWidth: 650 }} stickyHeader>
                     <TableHead>
                         <TableRow>
                             <TableCell>Cliente</TableCell>

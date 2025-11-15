@@ -25,6 +25,30 @@ export interface PlataformasMinutos {
     minutos: number;
 }
 
+export interface Pacote {
+    pacid: number;
+    pacId: number;
+    preco: number;
+    datatempo: string;
+    cpf: string;
+    clinome: string;
+    pacnome: string;
+    tempoadicionar?: number;
+    tempocomputador?: number;
+    tempoconsole?: number;
+    temposimulador?: number;
+}
+
+export interface PacoteInfo {
+    id: number;
+    nome: string;
+    preco: number;
+    tempoadicionar?: number;
+    tempocomputador?: number;
+    tempoconsole?: number;
+    temposimulador?: number;
+}
+
 // Types para respostas da API
 export interface ApiResponse<T = any> {
     success: boolean;
@@ -63,8 +87,8 @@ export interface Cliente {
 export interface Sessao {
     id: number;
     cliente: Partial<Cliente>;
-    dateTimeInicio: Date;
-    dateTimeFim: Date | null;
+    datatempoinicio: Date;
+    datatempofim: Date | null;
     motivotermino: string | null;
     maquina: Partial<Maquina>;
 }
@@ -203,6 +227,15 @@ export default class APIClient {
         }
     }
 
+    async verificarClienteNovo(cpf: string): Promise<{ novo: boolean }> {
+        try {
+            const result = await this.get<{ novo: boolean }>('/verificarClienteNovo', { cpf });
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     async updateCliente(cpf: string, updates: Partial<Cliente>): Promise<Cliente> {
         try {
             const updatedCliente = await this.put<Cliente>(`/updateCliente?search=${cpf}`, updates);
@@ -252,6 +285,33 @@ export default class APIClient {
         try {
             const maquinas = await this.get<Maquina[]>('/getAllMaquinas');
             return maquinas;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getAllClientePacotes(): Promise<Pacote[]> {
+        try {
+            const pacotes = await this.get<Pacote[]>('/getAllClientePacotes');
+            return pacotes;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getAllPacotes(): Promise<Pacote[]> {
+        try {
+            const pacotes = await this.get<Pacote[]>('/getAllPacotes');
+            return pacotes;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async createClientePacote(cpf: string, pacote: number, data?: string): Promise<ApiResponse> {
+        try {
+            const response = await this.postRaw('/createClientePacote', { cpf, pacote, data });
+            return response;
         } catch (error) {
             throw this.handleError(error);
         }

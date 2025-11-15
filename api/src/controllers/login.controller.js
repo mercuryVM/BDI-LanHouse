@@ -55,7 +55,7 @@ exports.login = async (req, res) => {
     //se usuário for cliente, registrar sessao
     if (user.loginacesso) {
         await db.query(
-            "INSERT INTO sessao (cliente, datetimeinicio, maquina) VALUES ($1, $2, $3)",
+            "INSERT INTO sessao (cliente, datatempoinicio, maquina) VALUES ($1, $2, $3)",
             [user.cpf, date, maquina]
         );
     }
@@ -89,12 +89,12 @@ exports.logout = async (req, res) => {
         const endDate = new Date()
 
         await db.query(
-            "UPDATE sessao SET datetimefim = $1 AND motivotermino = $2 WHERE cliente = $3 AND datetimeinicio = $4",
+            "UPDATE sessao SET datatempofim = $1 AND motivotermino = $2 WHERE cliente = $3 AND datatempoinicio = $4",
             [endDate, 'deslogou', userId, startDate]
         );
 
         const { rows } = await db.query(
-            "SELECT * FROM sessao WHERE cliente = $1 AND datetimeinicio = $2",
+            "SELECT * FROM sessao WHERE cliente = $1 AND datatempoinicio = $2",
             [userId, startDate]
         );
         let sessao = rows[0];

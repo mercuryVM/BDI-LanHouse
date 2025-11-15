@@ -115,8 +115,8 @@ exports.getJogo = async (req, res) => {
 };
 
 exports.getRecentJogos = async (req, res) => {
-    //pegar id (cliente, datetimeinicio) das ultimas 10 sessões do usuário (pegar as ultimas datetimefim) em sessao, 
-    // olhar os ids dos jogos que estão com id dessas sessoes (cliente, datetimeinicio) que estão em sessaojogo e 
+    //pegar id (cliente, datatempoinicio) das ultimas 10 sessões do usuário (pegar as ultimas datatempofim) em sessao, 
+    // olhar os ids dos jogos que estão com id dessas sessoes (cliente, datatempoinicio) que estão em sessaojogo e 
     //com os ids dos jogos pegar os dados dos jogos em jogos
     const authHeader = req.headers.authorization;
 
@@ -126,8 +126,8 @@ exports.getRecentJogos = async (req, res) => {
     const { rows } = await db.query(`
         SELECT 
             s.cliente,
-            s.datetimeinicio as sessao_inicio,
-            s.datetimefim as sessao_fim,
+            s.datatempoinicio as sessao_inicio,
+            s.datatempofim as sessao_fim,
             j.id as jogo_id, 
             j.nome as jogo_nome, 
             j.descricao as jogo_descricao, 
@@ -137,22 +137,22 @@ exports.getRecentJogos = async (req, res) => {
             j.multiplayer as jogo_multiplayer,
             ARRAY_AGG(jp.nomeplataforma) as plataformas
         FROM sessao s
-        JOIN sessaojogo sj ON s.cliente = sj.cliente AND s.datetimeinicio = sj.datetimeinicio
+        JOIN sessaojogo sj ON s.cliente = sj.cliente AND s.datatempoinicio = sj.datatempoinicio
         JOIN jogo j ON sj.jogo = j.id
         LEFT JOIN jogoplataforma jp ON j.id = jp.idjogo
         WHERE s.cliente = $1 
-        AND s.datetimeinicio IN (
-            SELECT datetimeinicio 
+        AND s.datatempoinicio IN (
+            SELECT datatempoinicio 
             FROM sessao 
             WHERE cliente = $1 
-            ORDER BY datetimefim DESC 
+            ORDER BY datatempofim DESC 
             LIMIT 10
         )
         GROUP BY 
-            s.cliente, s.datetimeinicio, s.datetimefim,
+            s.cliente, s.datatempoinicio, s.datatempofim,
             j.id, j.nome, j.descricao, j.urlimagem, j.idaderecomendada, 
             j.inicializacao, j.multiplayer
-        ORDER BY s.datetimefim DESC, j.nome
+        ORDER BY s.datatempofim DESC, j.nome
 
     `, [id]);
 
@@ -189,7 +189,7 @@ exports.getMostPlayedJogos = async (req, res) => {
         j.inicializacao,
         j.multiplayer,
         COUNT(*) AS numero_sessoes,
-        AVG(EXTRACT(EPOCH FROM (s.datetimefim - s.datetimeinicio)) / 60) 
+        AVG(EXTRACT(EPOCH FROM (s.datatempofim - s.datatempoinicio)) / 60) 
             AS tempo_medio_minutos
     FROM sessaojogo s
     JOIN jogo j ON j.id = s.jogo
@@ -216,7 +216,7 @@ exports.getMostPlayedJogos = async (req, res) => {
         pico_horario AS (
             SELECT 
                 s.jogo,
-                EXTRACT(HOUR FROM s.datetimeinicio) AS hora,
+                EXTRACT(HOUR FROM s.datatempoinicio) AS hora,
                 COUNT(*) AS total_na_hora,
                 ROW_NUMBER() OVER (
                     PARTITION BY s.jogo 

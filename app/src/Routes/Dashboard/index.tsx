@@ -13,6 +13,7 @@ import { Game } from "./Game";
 import { Clientes } from "./Clientes";
 import { Sessoes } from "./Sessoes/Sessoes";
 import { Maquinas } from "./Maquinas";
+import { Pacotes } from "./Pacotes";
 
 
 const tabs = [
@@ -45,9 +46,16 @@ const tabs = [
         renderer: Maquinas
     },
     {
-        label: "Compras",
+        label: "Pacotes",
         icon: <ComprasIcon />,
-        permission: 'clt'
+        permission: 'clt',
+        renderer: Pacotes
+    }, 
+    {
+        label: "Manutenções",
+        icon: <MaquinasIcon />,
+        permission: 'clt',
+        renderer: Maquinas
     }
 ]
 
