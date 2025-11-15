@@ -40,7 +40,7 @@ export default function Home({ client }: { client: APIClient }) {
 
     return (
         <div className={styles.container}>
-            <div className={styles.bg} />
+            <video src={"/arena_video.mp4"} autoPlay={true} loop muted className={styles.bg} />
             <div className={styles.login}>
                 <Typography variant="h3" gutterBottom textAlign={"center"}>
                     Arena Gamer

@@ -63,6 +63,7 @@ export interface Sessao {
     dateTimeInicio: Date;
     dateTimeFim: Date | null;
     motivotermino: string | null;
+    maquina: Partial<Maquina>;
 }
 
 export default class APIClient {

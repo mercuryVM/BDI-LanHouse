@@ -1,14 +1,13 @@
 .bg {
     flex: 1;
-            background: url(./assets/lanhouse.jpg);
-        background-position: center;
-        filter: blur(2px);
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        opacity: 0.1;
+    background-position: center;
+    filter: blur(2px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.1;
 }
 
 .login {

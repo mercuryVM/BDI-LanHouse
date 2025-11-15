@@ -161,6 +161,7 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
                     <TableHead>
                         <TableRow>
                             <TableCell>Cliente</TableCell>
+                            <TableCell align="center">Máquina</TableCell>
                             <TableCell align="center">Início</TableCell>
                             <TableCell align="center">Fim</TableCell>
                             <TableCell align="center">Duração</TableCell>
@@ -169,9 +170,9 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredSessoes.map((sessao) => (
+                        {filteredSessoes.map((sessao, index) => (
                             <TableRow
-                                key={sessao.id}
+                                key={index}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                 hover
                             >
@@ -189,6 +190,14 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
                                             </Typography>
                                         </Box>
                                     </Box>
+                                </TableCell>
+                                <TableCell align="center">
+                                    <Chip 
+                                        label={`Máquina ${sessao.maquina?.id || '?'}`} 
+                                        size="small" 
+                                        variant="outlined"
+                                        color="primary"
+                                    />
                                 </TableCell>
                                 <TableCell align="center">
                                     <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
@@ -236,7 +245,7 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
                         ))}
                         {filteredSessoes.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={6}>
+                                <TableCell colSpan={7}>
                                     <Box textAlign="center" py={4}>
                                         <Typography variant="h6" color="text.secondary">
                                             Nenhuma sessão encontrada

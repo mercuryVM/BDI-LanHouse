@@ -89,8 +89,8 @@ exports.logout = async (req, res) => {
         const endDate = new Date()
 
         await db.query(
-            "UPDATE sessao SET datetimefim = $1 WHERE cliente = $2 AND datetimeinicio = $3",
-            [endDate, userId, startDate]
+            "UPDATE sessao SET datetimefim = $1 AND motivotermino = $2 WHERE cliente = $3 AND datetimeinicio = $4",
+            [endDate, 'deslogou', userId, startDate]
         );
 
         const { rows } = await db.query(
