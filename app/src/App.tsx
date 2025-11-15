@@ -69,7 +69,7 @@ function App() {
     }
 
     pingMaquina();
-    let intervalId = setInterval(pingMaquina, 30 * 1000); // ping a cada 30 segundos
+    let intervalId = setInterval(pingMaquina, 10 * 1000); // ping a cada 10 segundos
 
     return () => clearInterval(intervalId);
   }, [client])

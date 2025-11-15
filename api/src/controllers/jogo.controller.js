@@ -227,9 +227,9 @@ exports.getMostPlayedJogos = async (req, res) => {
         )
 
         SELECT 
-            spj.numero_sessoes,
+            spj.numero_sessoes AS numerosessoes,
             ph.hora AS pico_hora,
-            spj.jogo_id,
+            spj.jogo_id AS jogo_id,
             spj.nome AS jogo_nome,
             spj.descricao AS jogo_descricao,
             spj.urlimagem AS jogo_urlimagem,
@@ -239,8 +239,8 @@ exports.getMostPlayedJogos = async (req, res) => {
         FROM sessoes_por_jogo spj
         JOIN pico_horario ph ON spj.jogo_id = ph.jogo
         WHERE ph.rn = 1      
-        ORDER BY spj.numero_sessoes DESC;
-        LIMIT 10
+        ORDER BY spj.numero_sessoes DESC
+        LIMIT 10;
         `
     );
 

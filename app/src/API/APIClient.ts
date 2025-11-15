@@ -16,6 +16,7 @@ export interface Maquina {
     id: number;
     nomeplat: string;
     tipo: 0 | 1 | 2; // 0: PC, 1: Console, 2: Simulador
+    lastseen: string;
 }
 
 export interface PlataformasMinutos {
@@ -41,6 +42,8 @@ export interface Game {
     urlImagem: string;
     inicializacao: string;
     plataformas: string[];
+    numeroSessoes?: number;
+    picoHora?: number;
 }
 
 export interface Cliente {
@@ -226,10 +229,29 @@ export default class APIClient {
         }
     }
 
-    async getSessoes(): Promise<Sessao[]> {
+    async getSessoes(query: Record<string, any>): Promise<Sessao[]> {
+        console.log(query)
         try {
-            const sessoes = await this.get<Sessao[]>('/getSessoes');
+            const sessoes = await this.get<Sessao[]>('/getSessoes', query);
             return sessoes;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getMostPlayedJogos(): Promise<Game[]> {
+        try {
+            const jogos = await this.get<Game[]>('/getMostPlayedJogos');
+            return jogos;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getAllMaquinas(): Promise<Maquina[]> {
+        try {
+            const maquinas = await this.get<Maquina[]>('/getAllMaquinas');
+            return maquinas;
         } catch (error) {
             throw this.handleError(error);
         }
