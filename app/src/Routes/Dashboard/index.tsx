@@ -4,12 +4,14 @@ import GameIcon from "@mui/icons-material/SportsEsports";
 import UserIcon from "@mui/icons-material/Group";
 import SessionIcon from "@mui/icons-material/Computer";
 import MaquinasIcon from "@mui/icons-material/ComputerTwoTone";
+import ComprasIcon from "@mui/icons-material/ShoppingCart";
 import React, { useMemo } from "react";
 import { Home } from "./Home";
 import type APIClient from "../../API/APIClient";
 import { useUserDataRedux } from "../../hooks/useUserDataRedux";
 import { Game } from "./Game";
 import { Clientes } from "./Clientes";
+import { Sessoes } from "./Sessoes/Sessoes";
 
 
 const tabs = [
@@ -32,13 +34,19 @@ const tabs = [
     {
         label: "Sessões",
         icon: <SessionIcon />,
-        permission: 'clt'
+        permission: 'clt',
+        renderer: Sessoes
     },
     {
         label: "Máquinas",
         icon: <MaquinasIcon />,
         permission: 'clt'
     },
+    {
+        label: "Compras",
+        icon: <ComprasIcon />,
+        permission: 'clt'
+    }
 ]
 
 export default function Dashboard({ client }: { client: APIClient }) {

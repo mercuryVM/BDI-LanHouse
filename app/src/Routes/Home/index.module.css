@@ -1,28 +1,32 @@
 .bg {
     flex: 1;
-            background: url(./assets/lanhouse.jpg);
-        background-position: center;
-        filter: blur(2px);
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        opacity: 0.1;
+    background-position: center;
+    filter: blur(2px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.1;
 }
 
 .login {
-    width: 400px;
+    width: 450px;
     display: flex;
     flex-direction: column;
-    padding: 2% 20px;
-    background-color: rgba(20, 20, 20, 0.776);
-    backdrop-filter: blur(4px);
+    padding: 32px 28px;
+    background-color: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .container {
     display: flex;
     flex-direction: row;
     flex: 1;
-
+    align-items: center;
+    justify-content: center;
+    position: relative;
 }

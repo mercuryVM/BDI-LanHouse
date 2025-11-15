@@ -5,7 +5,7 @@ exports.getSessoes = async (req, res) => {
     const params = [];
     let paramCount = 0;
 
-    let query = "SELECT * FROM sessao JOIN cliente ON cliente = cpf WHERE 1=1";
+    let query = "SELECT * FROM sessao JOIN cliente ON cliente = cpf JOIN maquina ON maquina.id = sessao.maquina WHERE 1=1";
 
     if (cliente) {
         paramCount++;
@@ -55,12 +55,19 @@ exports.getSessoes = async (req, res) => {
         message: "Sessões consultadas com sucesso!",
         data: rows.map((row) => {
             return {
-                cliente: row.cliente,
+                id: row.id,
+                cliente: {
+                    cpf: row.cliente,
+                    nome: row.nome,
+                },
                 dateTimeInicio: row.datetimeinicio,
                 dateTimeFim: row.datetimefim,
                 motivotermino: row.motivotermino,
-                maquina: row.maquina,
-                nome: row.nome,
+                maquina: {
+                    id: row.maquina,
+                    lastseen: row.lastseen,
+                    nomeplat: row.nomeplat
+                }
             }
         })
 

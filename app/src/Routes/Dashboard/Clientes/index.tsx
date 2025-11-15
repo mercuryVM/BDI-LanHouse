@@ -37,6 +37,7 @@ import { Person, Star, SportsEsports, Computer, SportsBasketball, Close, Save, E
 import styles from "./index.module.css";
 import { useMemo } from "react";
 import { InputAdornment, ToggleButtonGroup, ToggleButton } from "@mui/material";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function Clientes({ client }: { client: APIClient, userData: UserData | null }) {
     const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -262,30 +263,47 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
     return (
         <div className={styles.container}>
             <Box className={styles.header}>
-                <Typography variant="h4" component="h1" gutterBottom>
-                    <FilterList sx={{ fontSize: 32, verticalAlign: "middle", mr: 1 }} />
-                    Clientes
-                </Typography>
+                <motion.div
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <Typography variant="h4" component="h1" gutterBottom>
+                        <FilterList sx={{ fontSize: 32, verticalAlign: "middle", mr: 1 }} />
+                        Clientes
+                    </Typography>
+                </motion.div>
                 
                 {/* Barra de Busca */}
-                <TextField
-                    fullWidth
-                    size="small"
-                    placeholder="Buscar por nome, CPF ou login..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <Search />
-                            </InputAdornment>
-                        ),
-                    }}
-                    sx={{ mb: 2 }}
-                />
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1, duration: 0.4 }}
+                >
+                    <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Buscar por nome, CPF ou login..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Search />
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{ mb: 2 }}
+                    />
+                </motion.div>
 
                 {/* Filtros Compactos */}
-                <Box display="flex" gap={2} flexWrap="wrap" alignItems="center" mb={2}>
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.4 }}
+                >
+                    <Box display="flex" gap={2} flexWrap="wrap" alignItems="center" mb={2}>
                     {/* Filtro VIP */}
                     <ToggleButtonGroup
                         value={vipFilter}
@@ -326,22 +344,37 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
                     </Typography>
 
                     {/* Botão Limpar */}
-                    {(searchQuery || vipFilter || genderFilter) && (
-                        <Button
-                            size="small"
-                            onClick={() => {
-                                setSearchQuery("");
-                                setVipFilter(null);
-                                setGenderFilter(null);
-                            }}
-                        >
-                            Limpar
-                        </Button>
-                    )}
+                    <AnimatePresence>
+                        {(searchQuery || vipFilter || genderFilter) && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <Button
+                                    size="small"
+                                    onClick={() => {
+                                        setSearchQuery("");
+                                        setVipFilter(null);
+                                        setGenderFilter(null);
+                                    }}
+                                >
+                                    Limpar
+                                </Button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </Box>
+                </motion.div>
             </Box>
 
-            <TableContainer component={Paper} className={styles.tableContainer}>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+            >
+                <TableContainer component={Paper} className={styles.tableContainer}>
                 <Table sx={{ minWidth: 650 }}>
                     <TableHead>
                         <TableRow>
@@ -432,6 +465,7 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
                     </TableBody>
                 </Table>
             </TableContainer>
+            </motion.div>
 
             <Drawer
                 anchor="right"
@@ -442,16 +476,24 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
                 }}
             >
                 {selectedCliente && (
-                    <Box className={styles.drawerContent}>
-                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                            <Typography variant="h5" component="h2">
-                                <Edit sx={{ fontSize: 28, verticalAlign: "middle", mr: 1 }} />
-                                Detalhes do Cliente
-                            </Typography>
-                            <IconButton onClick={handleCloseDrawer}>
-                                <Close />
-                            </IconButton>
-                        </Box>
+                    <motion.div
+                        initial={{ x: 100, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: 100, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <Box className={styles.drawerContent}>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                                <Typography variant="h5" component="h2">
+                                    <Edit sx={{ fontSize: 28, verticalAlign: "middle", mr: 1 }} />
+                                    Detalhes do Cliente
+                                </Typography>
+                                <motion.div whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
+                                    <IconButton onClick={handleCloseDrawer}>
+                                        <Close />
+                                    </IconButton>
+                                </motion.div>
+                            </Box>
 
                         <Divider sx={{ mb: 3 }} />
 
@@ -593,6 +635,7 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
                             </Box>
                         </Box>
                     </Box>
+                    </motion.div>
                 )}
             </Drawer>
 

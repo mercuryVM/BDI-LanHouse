@@ -57,6 +57,15 @@ export interface Cliente {
     temposimulador: number;
 }
 
+export interface Sessao {
+    id: number;
+    cliente: Partial<Cliente>;
+    dateTimeInicio: Date;
+    dateTimeFim: Date | null;
+    motivotermino: string | null;
+    maquina: Partial<Maquina>;
+}
+
 export default class APIClient {
     client: AxiosInstance;
     userData: UserData | null = null;
@@ -212,6 +221,15 @@ export default class APIClient {
     async deleteCliente(cpf: string): Promise<void> {
         try {
             await this.post<void>('/deleteCliente', { cpf });
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getSessoes(): Promise<Sessao[]> {
+        try {
+            const sessoes = await this.get<Sessao[]>('/getSessoes');
+            return sessoes;
         } catch (error) {
             throw this.handleError(error);
         }
