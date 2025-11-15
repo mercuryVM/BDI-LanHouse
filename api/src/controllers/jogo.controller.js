@@ -175,6 +175,31 @@ exports.getRecentJogos = async (req, res) => {
     });
 }
 
+exports.getMostPlayedJogos = async (req, res) => {
+    const { rows } = await db.query(
+        `SELECT COUNT(*) AS numeroSessoes, nome FROM sessaojogo JOIN jogo ON id = jogo GROUP BY jogo, nome`
+    ); 
+    
+    res.status(200).send({
+        success: true,
+        message: "Jogos consultado com sucesso!",
+        data: rows.map((row) => {
+            return {
+                id: row.jogo_id,
+                nome: row.jogo_nome,
+                descricao: row.jogo_descricao,
+                urlImagem: row.jogo_urlimagem,
+                idadeRecomendada: row.jogo_idaderecomendada,
+                inicializacao: row.jogo_inicializacao,
+                multiplayer: row.jogo_multiplayer,
+                numeroSessoes: row.numerosessoes
+            }
+        })
+
+    });
+
+}
+
 exports.deleteJogo = async (req, res) => {
     const { id } = req.query;
     const { rows } = await db.query(
