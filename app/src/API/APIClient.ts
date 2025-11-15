@@ -228,6 +228,7 @@ export default class APIClient {
     }
 
     async getSessoes(query: Record<string, any>): Promise<Sessao[]> {
+        console.log(query)
         try {
             const sessoes = await this.get<Sessao[]>('/getSessoes', query);
             return sessoes;

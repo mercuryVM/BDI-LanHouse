@@ -72,6 +72,7 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
     useEffect(() => {
         if (selectedMaquina && tabValue === 1) {
             setLoadingSessoes(true);
+            console.log('Carregando sessões para máquina:', selectedMaquina.id);
             client.getSessoes({ maquina: selectedMaquina.id })
                 .then(data => setSessoes(data))
                 .catch(error => console.error('Erro ao carregar sessões:', error))
@@ -113,8 +114,6 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
         const diffMinutes = Math.floor(diffMs / 1000 / 60);
         const diffHours = Math.floor(diffMinutes / 60);
         const diffDays = Math.floor(diffHours / 24);
-
-        console.log({ now, lastSeenDate, diffMs, diffMinutes, diffHours, diffDays });
 
         if (diffMinutes < 1) return { text: 'Online', isOnline: true };
         if (diffMinutes < 60) return { text: `${diffMinutes}m atrás`, isOnline: false };
@@ -604,7 +603,7 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                                         
                                                         return (
                                                             <TableRow
-                                                                key={sessao.id}
+                                                                key={sessao.cliente.cpf + "" + sessao.dateTimeInicio}
                                                                 component={motion.tr}
                                                                 initial={{ opacity: 0, x: -10 }}
                                                                 animate={{ opacity: 1, x: 0 }}
