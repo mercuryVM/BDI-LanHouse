@@ -12,3 +12,29 @@ exports.pingMaquina = async (req, res) => {
         success: true,
     });
 }
+
+exports.getMostUsedMaquinas = async (req, res) => {
+    const { rows } = await db.query(
+        `SELECT COUNT(*) as usos, m.id as maquinaId, p.nome as nomePlat, p.tipo as tipoPlat
+        FROM maquina m 
+        JOIN sessao s ON m.id = s.maquina 
+        JOIN plataforma p ON m.nomeplat = p.nome
+        GROUP BY m.id, p.nome, p.tipo
+        ORDER BY usos 
+        DESC LIMIT 10 
+        `
+    )
+
+    res.status(200).send({
+        success: true,
+        message: "Maquinas consultadas com sucesso!",
+        data: rows.map((row) => {
+            return {
+                usos: row.usos,
+                id: row.maquinaId,
+                nomePlataforma: row.nomePlat,
+                tipoPlataforma: row.tipoPlat
+            }
+        })
+    });
+}
