@@ -2,11 +2,14 @@ import { AppBar, CircularProgress, Dialog, DialogContent, Tab, Tabs } from "@mui
 import HomeIcon from "@mui/icons-material/HomeFilled";
 import GameIcon from "@mui/icons-material/SportsEsports";
 import UserIcon from "@mui/icons-material/Group";
+import SessionIcon from "@mui/icons-material/Computer";
+import MaquinasIcon from "@mui/icons-material/ComputerTwoTone";
 import React, { useMemo } from "react";
 import { Home } from "./Home";
 import type APIClient from "../../API/APIClient";
 import { useUserDataRedux } from "../../hooks/useUserDataRedux";
 import { Game } from "./Game";
+import { Clientes } from "./Clientes";
 
 
 const tabs = [
@@ -23,8 +26,19 @@ const tabs = [
     {
         label: "Clientes",
         icon: <UserIcon />,
+        permission: 'clt',
+        renderer: Clientes
+    },
+    {
+        label: "Sessões",
+        icon: <SessionIcon />,
         permission: 'clt'
-    }
+    },
+    {
+        label: "Máquinas",
+        icon: <MaquinasIcon />,
+        permission: 'clt'
+    },
 ]
 
 export default function Dashboard({ client }: { client: APIClient }) {

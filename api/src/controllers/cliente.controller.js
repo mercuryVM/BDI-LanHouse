@@ -42,7 +42,7 @@ exports.createCliente = async(req, res) => {
         loginacesso: req.body.loginacesso,
         senhaacesso: await argon2.hash(req.body.senhaacesso),
         genero: req.body.genero,
-        dataNasc: req.body.dataNasc,
+        datanasc: req.body.datanasc,
         endereco: req.body.endereco,
         vip: req.body.vip,
         datafimvip: req.body.datafimvip
@@ -63,7 +63,7 @@ exports.createCliente = async(req, res) => {
 
     await db.query(
         "INSERT INTO cliente VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 0, 0, 0)",
-        [novoCliente.cpf, novoCliente.nome, novoCliente.loginacesso, novoCliente.senhaacesso, novoCliente.genero, novoCliente.dataNasc, novoCliente.endereco, novoCliente.vip, novoCliente.datahoravip]
+        [novoCliente.cpf, novoCliente.nome, novoCliente.loginacesso, novoCliente.senhaacesso, novoCliente.genero, novoCliente.datanasc, novoCliente.endereco, novoCliente.vip, novoCliente.datafimvip]
     );
 
     res.status(200).send({
@@ -74,7 +74,7 @@ exports.createCliente = async(req, res) => {
 }
 
 exports.deleteCliente = async(req, res) => {
-    const cpfExcluir = req.body.cpf;
+    const cpfExcluir = req.query.search;
     
     const {rows} = await db.query(
         "SELECT nome FROM cliente WHERE cpf = $1",
@@ -104,7 +104,7 @@ exports.updateCliente = async(req, res, next) => {
     const cpf = req.query.search;
 
     const campos = [];
-    const camposPermitidos = ["nome", "loginacesso", "senhaacesso", "genero", "dataNasc", "endereco", "vip", "datafimvip", "tempocomputador", "tempoconsole", "temposimulador"];
+    const camposPermitidos = ["nome", "loginacesso", "senhaacesso", "genero", "datanasc", "endereco", "vip", "datafimvip", "tempocomputador", "tempoconsole", "temposimulador"];
 
     let flagCampos = false; // se nenhum campo for valido, nao tenta atualizar
 
