@@ -36,7 +36,7 @@ import {
 import { Person, Star, SportsEsports, Computer, SportsBasketball, Close, Save, Edit, Add, Delete } from "@mui/icons-material";
 import styles from "./index.module.css";
 
-export function Clientes({ client, userData }: { client: APIClient, userData: UserData | null }) {
+export function Clientes({ client }: { client: APIClient, userData: UserData | null }) {
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
@@ -113,7 +113,7 @@ export function Clientes({ client, userData }: { client: APIClient, userData: Us
 
         setSaving(true);
         try {
-            const updatedCliente = await client.updateCliente(selectedCliente.cpf, editedCliente);
+            await client.updateCliente(selectedCliente.cpf, editedCliente);
             
             // Atualizar a lista de clientes
             setClientes(prev => prev.map(c => 

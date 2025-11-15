@@ -11,6 +11,7 @@ const userRoute = require('./routes/user.routes');
 const agendamentoRoute = require('./routes/agendamento.routes');
 const jogoRoute = require('./routes/jogo.routes');
 const clienteRoute = require('./routes/cliente.routes');
+const maquinaRoute = require('./routes/maquina.routes');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -23,5 +24,6 @@ app.use('/api/', jogoRoute);
 app.use('/api/', userRoute);
 app.use('/api/', loginRoute);
 app.use('/api/', clienteRoute);
+app.use('/api/', maquinaRoute);
 
 module.exports = app;

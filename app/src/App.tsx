@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import Home from './Routes/Home'
@@ -57,6 +57,22 @@ const theme = createTheme({
 
 function App() {
   const client: APIClient = useClient();
+
+  useEffect(() => {
+    async function pingMaquina() {
+      try {
+        const maquinaId = await window.api.getMaquinaId();
+        await client.post('/pingMaquina', { id: maquinaId });
+      } catch (error) {
+        console.error('Failed to ping maquina:', error);
+      }
+    }
+
+    pingMaquina();
+    let intervalId = setInterval(pingMaquina, 30 * 1000); // ping a cada 30 segundos
+
+    return () => clearInterval(intervalId);
+  }, [client])
 
   return (
     <Provider store={store}>
