@@ -120,3 +120,47 @@ exports.getManutencoes = async (req, res) => {
 
     });
 };
+
+exports.getManutencoesHardware = async (req, res) => {
+    const { id } = req.query;
+    const { rows } = await db.query(
+        `SELECT 
+            h.id AS hardwareID,
+            h.nome AS hardwareNome,
+            h.estado AS hardwareEstado,
+            h.tipo AS hardwareTipo,
+            maq.id AS maquinaID, 
+            p.nome as nomePlat, 
+            p.tipo as tipoPlat
+
+        FROM manutencaomaquina manMaq
+        JOIN hardware h ON manMaq.idhardware = h.id
+        JOIN maquina maq ON h.idmaquina = maq.id
+        JOIN plataforma p ON maq.nomeplat = p.nome
+        WHERE h.id = $1`,
+        [id]
+    );
+
+    if (rows.length === 0) {
+        return res.status(404).send({
+            success: false,
+            errors: ["Nenhum hardware em manutenção encontrado!"],
+        });
+    }
+
+    res.status(200).send({
+        success: true,
+        message: "Hardwares em manutenção consultados com sucesso!",
+        data: rows.map((row) => {
+            return {
+                hardwareID: row.hardwareID,
+                hardwareNome: row.hardwareNome,
+                hardwareEstado: row.hardwareEstado,
+                hardwareTipo: row.hardwareTipo,
+                maquinaID: row.maquinaID,
+                nomePlat: row.nomePlat,
+                tipoPlat: row.tipoPlat,
+            }
+        })
+    });
+}
