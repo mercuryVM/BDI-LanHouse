@@ -93,6 +93,17 @@ export interface Sessao {
     maquina: Partial<Maquina>;
 }
 
+export interface Manutencao {
+    manutencaoid: number;
+    manutencaotipo: string;
+    manutecaoprioridade: string;
+    manutencaodatatempoinicio: Date;
+    maquinaid: number;
+    nomeplat: string;
+    tipoplat: number;
+    nomefuncionario: string;
+}
+
 export default class APIClient {
     client: AxiosInstance;
     userData: UserData | null = null;
@@ -312,6 +323,24 @@ export default class APIClient {
         try {
             const response = await this.postRaw('/createClientePacote', { cpf, pacote, data });
             return response;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getManutencoes(query?: { prioridade?: string; tipo?: string; periodo?: string }): Promise<Manutencao[]> {
+        try {
+            const manutencoes = await this.get<Manutencao[]>('/getManutencoes', query || {});
+            return manutencoes;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getManutencao(id: number): Promise<Manutencao> {
+        try {
+            const manutencao = await this.get<Manutencao>('/getManutencao', { id });
+            return manutencao;
         } catch (error) {
             throw this.handleError(error);
         }
