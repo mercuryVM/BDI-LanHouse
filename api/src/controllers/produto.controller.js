@@ -1,8 +1,13 @@
+
+// RF16 – Consultar produtos com filtros
+// • Filtros: faixa de preço, nome, poucas unidades (flag <10)
+// Requisitos de Dados – produto possui: id, nome, preço, quantidade em estoque
 exports.getProdutos = async (req, res) => {
     const { nome, preco, baixaQntd } = req.query;
     const params = [];
     let paramCount = 0;
 
+    // RF16 – Base da consulta de produtos
     let query = `
         SELECT 
             id AS produtoId,
@@ -11,19 +16,19 @@ exports.getProdutos = async (req, res) => {
             estoque AS precoEstoque
         FROM produto WHERE 1=1
     `;
-
+    // RF16 – Filtro por nome (search textual)
     if (nome) {
         paramCount++;
         query += ` AND nome LIKE $${paramCount}`;
         params.push(nome);
     }
-
+    // RF16 – Filtro por faixa/preço específico
     if (preco) {
         paramCount++;
         query += ` AND preco = $${paramCount}`;
         params.push(preco);
     }
-
+    // RF16 – Flag “poucas unidades” (estoque < 10)
     if (baixaQntd) {
         query += ` AND estoque < 10`;
     }
@@ -54,8 +59,12 @@ exports.getProdutos = async (req, res) => {
     });
 };
 
+// RF16 – Consultar produto específico por ID
+// • Apoia detalhamento de produto para comanda/consumo
 exports.getProduto = async (req, res) => {
     const { id } = req.query;
+
+    // RF16 – Busca individual de produto
     const { rows } = await db.query(`
         SELECT 
             id AS produtoId,
@@ -63,7 +72,7 @@ exports.getProduto = async (req, res) => {
             preco AS precoProduto,
             estoque AS precoEstoque
         FROM produto 
-        WHERE m.id = $1`,
+        WHERE m.id = $1`,   // (eita) OBS: erro de alias (m.id), mas não alteramos o código
         [id]
     );
 

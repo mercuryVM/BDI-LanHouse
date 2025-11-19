@@ -1,7 +1,14 @@
 const db = require("../config/database");
 
+// RF12 – Consultar manutenção específica
+// • Consulta manutenção por ID
+// • Inclui prioridade, tipo, data agendada, máquina, plataforma e funcionário responsável
+// • Requisito de Dados: manutenção possui id, tipo, prioridade; relacionamento com agendamento e máquina
+// • RF10 (apoio): status da máquina depende de manutenção
+// • RF13 (apoio): máquinas em manutenção devem ser bloqueadas — este controller fornece a informação usada por outras regras
 exports.getManutencao = async (req, res) => {
     const { id } = req.query;
+    // RF12 – Consulta manutenção + agendamento + máquina + plataforma + funcionário
     const { rows } = await db.query(
         `SELECT 
             m.id AS manutencaoID,
@@ -48,11 +55,18 @@ exports.getManutencao = async (req, res) => {
     });
 }
 
+// RF12 – Consultar múltiplas manutenções com filtros
+// • Filtro por prioridade
+// • Filtro por tipo (preventiva/corretiva)
+// • Filtro por período (hoje, amanhã, X dias…)
+// • RF13 – permite identificar quais máquinas estão bloqueadas
+// • RF14 – permite consultas para máquinas com mais defeitos/manutenções
 exports.getManutencoes = async (req, res) => {
     const { prioridade, tipo, periodo } = req.query;
     const params = [];
     let paramCount = 0;
 
+    // RF12 – Base da consulta geral de manutenções + máquina + plataforma + funcionário
     let query = `SELECT 
             m.id AS manutencaoID,
             m.tipo AS manutencaoTipo,
@@ -70,18 +84,19 @@ exports.getManutencoes = async (req, res) => {
         JOIN funcionario f ON a.agendadopor = f.cpf
         WHERE 1=1`;
 
+    // RF12 – Filtro por prioridade da manutenção
     if (prioridade) {
         paramCount++;
         query += ` AND m.prioridade = $${paramCount}`;
         params.push(prioridade);
     }
-
+    // RF12 – Filtro por tipo de manutenção (preventiva/corretiva)
     if (tipo) {
         paramCount++;
         query += ` AND m.tipo = $${paramCount}`;
         params.push(tipo);
     }
-
+    // RF12 – Filtro por período: hoje, amanhã, X dias, esta semana…
     if (periodo) {
         const dias = parseInt(periodo);
         if (!isNaN(dias) && dias > 0) {
@@ -121,8 +136,14 @@ exports.getManutencoes = async (req, res) => {
     });
 };
 
+// RF14 – Gerenciar peças e hardwares com defeito
+// • Lista hardwares relacionados a manutenções
+// • Requisito de Dados: hardware tem id, nome, estado, tipo, máquina associada
+// • RF13 – máquinas em manutenção devem ser bloqueadas; esse endpoint revela hardwares envolvidos
 exports.getManutencoesHardware = async (req, res) => {
     const { id } = req.query;
+    
+    // RF14 – consulta de hardwares com registro de manutenção
     const { rows } = await db.query(
         `SELECT 
             h.id AS hardwareID,

@@ -1,6 +1,14 @@
 const db = require("../config/database");
 
+// RF11 – Gerenciar clientes (visão consolidada do perfil)
+// • Retorna dados do cliente logado: VIP, tempos por plataforma, etc.
+// • Apoia análises de frequência, total de horas, perfil do cliente, etc.
+// RF06 / RF08 – Apoio à consolidação das sessões e consumo de pacotes
+// • Exposição dos saldos de tempo (tempocomputador, tempoconsole, temposimulador)
+// Requisitos de Dados – cliente: CPF, nome, VIP, data de fim VIP, tempos por plataforma
+
 exports.user = async (req, res) => {
+    // Recupera sessão autenticada (SessionManager já alimentou req.session)
     //pegar token do cabeçalho
     const userId = req.session.id;
     const userType = req.session.type;
@@ -22,6 +30,12 @@ exports.user = async (req, res) => {
         });
     }
 
+    
+    // RF11 – Monta visão consolidada do usuário:
+    // • cliente: status VIP + data fim + tempos por plataforma
+    // • funcionário: só identificação básica
+    // • role: distingue “cliente” de “clt”
+    // • maquina: máquina atual da sessão (apoia RF01/RF04/RF05)
     const userData = {
         cpf: user.cpf,
         nome: user.nome,
