@@ -15,6 +15,7 @@ import { Sessoes } from "./Sessoes/Sessoes";
 import { Maquinas } from "./Maquinas";
 import { Pacotes } from "./Pacotes";
 import { Manutencao } from "./Manutencao";
+import { Hardware } from "./Hardware";
 
 
 const tabs = [
@@ -57,6 +58,12 @@ const tabs = [
         icon: <MaquinasIcon />,
         permission: 'clt',
         renderer: Manutencao
+    },
+    {
+        label: "Hardware",
+        icon: <MaquinasIcon />,
+        permission: 'clt',
+        renderer: Hardware
     }
 ]
 

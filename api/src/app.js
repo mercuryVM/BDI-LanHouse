@@ -17,6 +17,7 @@ const pacoteRoute = require('./routes/pacote.routes');
 const manutencaoRoute = require('./routes/manutencao.routes')
 const produtoRoute = require('./routes/produto.routes')
 const comandaRoute = require('./routes/comanda.routes')
+const hardwareRoute = require('./routes/hardware.routes')
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -35,5 +36,6 @@ app.use('/api/', pacoteRoute);
 app.use('/api/', manutencaoRoute);
 app.use('/api/', produtoRoute)
 app.use('/api/', comandaRoute);
+app.use('/api/', hardwareRoute);
 
 module.exports = app;

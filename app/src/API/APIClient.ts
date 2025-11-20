@@ -350,6 +350,76 @@ export default class APIClient {
         }
     }
 
+    // Hardware / Estoque
+    async getAllHardwares(query?: { tipo?: string; estado?: string; disponivel?: string }): Promise<Hardware[]> {
+        try {
+            const hardwares = await this.get<Hardware[]>('/getAllHardwares', query || {});
+            return hardwares;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getEstoqueStats(): Promise<{
+        total: number;
+        disponiveis: number;
+        em_uso: number;
+        porEstado: Array<{ estado: string; quantidade: number }>;
+        porTipo: Array<{ tipo: string; quantidade: number }>;
+    }> {
+        try {
+            const stats = await this.get('/getEstoqueStats');
+            return stats;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getTiposHardware(): Promise<string[]> {
+        try {
+            const tipos = await this.get<string[]>('/getTiposHardware');
+            return tipos;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getEstadosHardware(): Promise<string[]> {
+        try {
+            const estados = await this.get<string[]>('/getEstadosHardware');
+            return estados;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async createHardware(data: { nome: string; tipo: string; estado?: string }): Promise<ApiResponse<Hardware>> {
+        try {
+            const response = await this.postRaw('/createHardware', data);
+            return response;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async updateHardware(id: number, data: { nome?: string; tipo?: string; estado?: string }): Promise<ApiResponse<Hardware>> {
+        try {
+            const response = await this.client.put(`/updateHardware?id=${id}`, data);
+            return this.handleResponse<Hardware>(response);
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async deleteHardware(id: number): Promise<ApiResponse> {
+        try {
+            const response = await this.client.delete(`/deleteHardware?id=${id}`);
+            return this.handleResponse(response);
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     async getAllClientePacotes(): Promise<Pacote[]> {
         try {
             const pacotes = await this.get<Pacote[]>('/getAllClientePacotes');

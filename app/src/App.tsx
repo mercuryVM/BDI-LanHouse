@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import Home from './Routes/Home'
@@ -6,8 +6,6 @@ import { createTheme, ThemeProvider } from '@mui/material'
 import Dashboard from './Routes/Dashboard'
 import { useClient } from './Hooks/useClient'
 import type APIClient from './API/APIClient'
-import { Provider } from 'react-redux'
-import { store } from './store'
 
 const theme = createTheme({
   palette: {
@@ -69,22 +67,20 @@ function App() {
     }
 
     pingMaquina();
-    let intervalId = setInterval(pingMaquina, 10 * 1000); // ping a cada 10 segundos
+    const intervalId = setInterval(pingMaquina, 10 * 1000);
 
     return () => clearInterval(intervalId);
-  }, [client])
+  }, []) // Removido client das dependências - ele é estável
 
   return (
-    <Provider store={store}>
-      <BrowserRouter>
-        <ThemeProvider theme={theme}>
-          <Routes>
-            <Route path={"/"} element={<Home client={client} />} />
-            <Route path={"/dashboard"} element={<Dashboard client={client} />} />
-          </Routes>
-        </ThemeProvider>
-      </BrowserRouter>
-    </Provider>
+    <BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <Routes>
+          <Route path={"/"} element={<Home client={client} />} />
+          <Route path={"/dashboard"} element={<Dashboard client={client} />} />
+        </Routes>
+      </ThemeProvider>
+    </BrowserRouter>
   )
 }
 
