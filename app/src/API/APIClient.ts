@@ -504,6 +504,22 @@ export default class APIClient {
         }
     }
 
+    async listarClientesFiltro(filtro: {
+        totalHoras?: boolean;
+        numSessoes?: boolean;
+        frequenciaVisitas?: boolean;
+        ultimaVisita?: boolean;
+        clientesInativos?: boolean;
+        deltaMeses?: number;
+    }): Promise<any[]> {
+        try {
+            const result = await this.post<any[]>('/listarClientesFiltro', filtro);
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     // Métodos utilitários para diferentes tipos de requisições
     async put<T = any>(resource: string, data: Record<string, any> = {}): Promise<T> {
         try {
