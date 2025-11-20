@@ -1,13 +1,20 @@
 const db = require("../config/database");
 const SessionManager = require('../sessions');
 
+
+// RF17 – Gerenciar catálogo de jogos
+// • Permite cadastrar novos jogos no sistema (título, descrição, imagem, idade recomendada, etc.)
+// • Requisito de Dados: jogo possui ID, nome, descrição, urlImagem, idade recomendada, inicialização, multiplayer.
+// • Também associa o jogo às plataformas compatíveis.
 exports.createJogo = async (req, res) => {
     const { id, nome, descricao, urlimagem, idaderecomendada, inicializacao, multiplayer, plataformas } = req.body;
+
+    // RF17 – Inserção dos dados do jogo
     await db.query(
         "INSERT INTO jogo (id, nome, descricao, urlimagem, idaderecomendada, inicializacao, multiplayer) VALUES ($1, $2, $3, $4, $5, $6, $7)",
         [id, nome, descricao, urlimagem, idaderecomendada, inicializacao, multiplayer]
     );
-
+    // RF17 – Associação do jogo às plataformas (PC/console/simulador)
     for (let plat of plataformas.length) {
         await db.query(
             "INSERT INTO jogoplataforma (idjogo, nomeplataforma) VALUES ($1, $2)",
@@ -24,6 +31,10 @@ exports.createJogo = async (req, res) => {
     });
 };
 
+
+// RF17 – Consultar catálogo de jogos e tendências
+// • Lista todos os jogos com suas plataformas associadas
+// • Sustenta navegação do catálogo e análise de tendências
 exports.getAllJogos = async (req, res) => {
     //pegar todos os jogos e as plataformas associadas sem ficar repetindo jogos porque pode haver multiplas plataformas
     const { rows } = await db.query(`
@@ -68,6 +79,8 @@ exports.getAllJogos = async (req, res) => {
     });
 };
 
+// RF17 – Consultar jogo específico (exibir detalhes)
+// Suporte ao catálogo e seleção de títulos durante sessões
 exports.getJogo = async (req, res) => {
     const { id } = req.query;
     const { rows } = await db.query(`
@@ -114,6 +127,10 @@ exports.getJogo = async (req, res) => {
     });
 };
 
+
+// RF17 – Análise de tendências por cliente
+// • Obtém os jogos mais usados nas últimas 10 sessões do usuário
+// • Atende: “perfil dos clientes”, “tendências de jogos”, “jogos jogados recentemente” (Requisitos de Domínio)
 exports.getRecentJogos = async (req, res) => {
     //pegar id (cliente, datatempoinicio) das ultimas 10 sessões do usuário (pegar as ultimas datatempofim) em sessao, 
     // olhar os ids dos jogos que estão com id dessas sessoes (cliente, datatempoinicio) que estão em sessaojogo e 
@@ -175,6 +192,11 @@ exports.getRecentJogos = async (req, res) => {
     });
 }
 
+
+// RF17 – Estatísticas gerais de jogos
+// • Identifica jogos mais jogados (popularidade)
+// • Calcula horário de maior pico por jogo
+// • Atende: "tendências", "horários de pico", "tempo médio" (Domínio)
 exports.getMostPlayedJogos = async (req, res) => {
 
     //TODO: colocar datatimefim em sessaojogo (banco e cod
@@ -265,6 +287,7 @@ exports.getMostPlayedJogos = async (req, res) => {
 
 }
 
+// RF17 – Remover jogo do catálogo
 exports.deleteJogo = async (req, res) => {
     const { id } = req.query;
     const { rows } = await db.query(

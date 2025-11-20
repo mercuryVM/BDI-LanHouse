@@ -1,5 +1,7 @@
 const db = require("../config/database");
 
+// RF09 – Listar comandas consolidadas
+// (Mostra comandas com cliente, funcionário emissor e total consumido)
 exports.getAllComandas = async(req, res) => {
     const linhaQuery = 
     "SELECT co.id, co.data, co.emissao as cpfFuncionario, f.nome AS nomeFuncionario, cl.cpf as cpfcliente, cl.nome AS nomecliente," +
@@ -23,6 +25,9 @@ exports.getAllComandas = async(req, res) => {
     });
 }
 
+// RF09 – Consultar comandas consolidadas
+// – filtro por cliente (CPF/nome) ou por id da comanda
+// – opcionalmente restringe para comandas do dia (hoje)
 exports.getComanda = async(req, res) => {
     if(!req.query.searchParam){
         res.status(400).send({
@@ -48,6 +53,7 @@ exports.getComanda = async(req, res) => {
         "WHERE (cl.cpf = $1 OR cl.nome ILIKE $2 OR co.id = $1) "
     );
 
+    // RF09 – Filtro adicional “somente comandas de hoje”
     if(Boolean(hoje)){
         const date = new Date().toISOString().split('T')[0];
         const datequery = `AND co.data = '${date}'`;
@@ -73,6 +79,8 @@ exports.getComanda = async(req, res) => {
     });
 }
 
+// RF08 – Abrir comanda para registrar consumo durante a sessão
+// – garante que o cliente tenha no máximo uma comanda em aberto (fechada=false)
 exports.abrirComandaDoCliente = async(req, res) => {
     if(!req.body.cliente || !req.body.funcionario){
         res.status(400).send({
@@ -85,7 +93,8 @@ exports.abrirComandaDoCliente = async(req, res) => {
     const funcionario = req.body.funcionario;
     const dataHoje = new Date().toISOString().split('T')[0];
 
-    // se ja existe uma comanda para esse cliente que ainda não foi paga, nao cria outra, usa essa
+    // RF08 – Verifica se já existe comanda aberta para o cliente
+    // se já existir, reutiliza a mesma (não cria uma nova)
     let result = await db.query("SELECT id FROM comanda WHERE cliente=$1 AND fechada=false", [cliente]);
 
     if(result.rowCount > 0){
@@ -97,7 +106,7 @@ exports.abrirComandaDoCliente = async(req, res) => {
         return;
     }
 
-    // cria a comanda e pega o id dela, devolve pro front
+    // RF08 – Cria nova comanda aberta (estado inicial de consumo)
     result = await db.query("INSERT INTO comanda (data, emissao, cliente, fechada) VALUES ($1, $2, $3, false) RETURNING id", [dataHoje, funcionario, cliente]);
 
     res.status(200).send({
@@ -107,6 +116,8 @@ exports.abrirComandaDoCliente = async(req, res) => {
     });
 }
 
+// RF08 – Registrar/atualizar consumo de produtos na comanda
+// – soma quantidade se o produto já existe na comanda, senão insere
 exports.adicionarProdutoNaComanda = async(req, res) => {
     const comanda = req.body.comanda;
     const produto = req.body.produto;
@@ -119,10 +130,12 @@ exports.adicionarProdutoNaComanda = async(req, res) => {
         });
     }
     
+    // RF08 – Verifica se já há linha de comandaProduto para esse produto
     const result = await db.query("SELECT quantidade FROM comandaProduto WHERE comanda=$1 AND produto=$2", [comanda, produto]);
     if(result.rowCount){
         const novaQtd = parseFloat(result.rows[0].quantidade) + parseFloat(quantidade);
 
+        // RF08 – Atualiza quantidade total consumida do produto na comanda
         await db.query("UPDATE comandaProduto SET quantidade=$1 WHERE comanda=$2 AND produto=$3", [novaQtd, comanda, produto]);
             res.status(200).send({
             success: true,
@@ -131,6 +144,7 @@ exports.adicionarProdutoNaComanda = async(req, res) => {
         return;
     }
 
+    // RF08 – Insere novo produto na comanda
     await db.query("INSERT INTO comandaProduto VALUES ($1, $2, $3)", [comanda, produto, quantidade]);
 
     res.status(200).send({
@@ -139,6 +153,8 @@ exports.adicionarProdutoNaComanda = async(req, res) => {
     });
 }
 
+// RF09 – Finalizar comanda consolidada ao final da sessão
+// – muda status da comanda para fechada=true
 exports.fecharComandaDoCliente = async(req, res) => {
     const comanda = req.body.comanda;
     

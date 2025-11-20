@@ -1,6 +1,9 @@
 const luxon = require("luxon");
 const DateTime = luxon.DateTime;
 
+// RF17 – Relatórios: “pacotes mais comprados”
+// • Apoia análise de consumo: quais pacotes são mais populares
+// • Requisito de domínio: arena analisa tendências de pacotes comprados
 exports.getMostBoughtPacotes = async (req, res) => {
     const { rows } = await db.query(
         `SELECT COUNT(*) as comprados, p.id as pacoteId, p.nome as nomePacote, p.preco as precoPacote
@@ -28,6 +31,8 @@ exports.getMostBoughtPacotes = async (req, res) => {
 
 const db = require("../config/database");
 
+// RF06 – Gerenciar sessões e pacotes utilizados pelos clientes
+// Requisitos de Dados – Pacotes possuem: id, preço, tempos por plataforma, benefícios VIP
 exports.getAllPacotes = async (req, res) => {
     const { rows } = await db.query(
         "SELECT p.id, p.nome, p.preco, o.tempocomputador, o.tempoconsole, o.temposimulador, pv.tempoadicionar " +
@@ -43,6 +48,9 @@ exports.getAllPacotes = async (req, res) => {
     });
 }
 
+// RF06 / RF08 – Apoia consolidação de sessões:
+// • Clientes compram pacotes, que viram saldo de horas computado nas sessões.
+// Requisitos de dados: clientePacote registra compras de pacotes (cliente, pacote, data).
 exports.getAllClientePacotes = async (req, res) => {
     const { rows } = await db.query(
         "SELECT c.cpf, p.id as pacId, cp.datatempo, c.nome as cliNome, p.nome as pacNome, p.preco, o.tempocomputador, o.tempoconsole, o.temposimulador, pv.tempoadicionar " +
@@ -61,6 +69,9 @@ exports.getAllClientePacotes = async (req, res) => {
     });
 }
 
+// RF06 / RF11 – Consultar compras de pacotes por cliente
+// • Filtro por CPF ou nome
+// • Usado para análises de visitas, horas, fidelidade, etc.
 exports.getClientePacote = async (req, res) => {
     if (!req.query.searchParam) {
         res.status(400).send({
@@ -97,8 +108,18 @@ exports.getClientePacote = async (req, res) => {
     });
 }
 
+
+// RF06 – Gerenciar pacotes contratados pelo cliente
+// RF08 – Contabilizar consumo de pacotes (adicionar saldo de horas)
+// RF07 – Verificar se é primeira compra (usado no fluxo de promoções) — este método fornece dados usados por RF07
+// Requisitos de Dados:
+// • Pacote adiciona horas por plataforma (PC/Console/Simulador)
+// • Pacote VIP estende validade de VIP (datafimvip)
+// • clientePacote registra a compra do pacote
+
 // enviar do front a "data" já formatada para o banco. Nessa função a data é opcional, se não tiver ele pega a de hoje
 exports.createClientePacote = async (req, res) => {
+
     if (!req.body.cpf || !req.body.pacote) {
         res.status(400).send({
             success: false,
@@ -131,7 +152,7 @@ exports.createClientePacote = async (req, res) => {
 
         const cliente = clienteRows[0];
 
-        // Validar pacote e obter seus dados
+        // Requisito de Dados – obtém definição completa do pacote (ordinário/VIP)
         const { rows: pacoteRows } = await client.query(
             "SELECT pacote.id, nome, preco, tempocomputador, tempoconsole, temposimulador, tempoadicionar FROM pacote LEFT JOIN ordinario ON ordinario.id = pacote.id LEFT JOIN pacotevip ON pacotevip.id = pacote.id WHERE pacote.id = $1;",
             [pacoteId]
@@ -147,6 +168,8 @@ exports.createClientePacote = async (req, res) => {
         const pacote = pacoteRows[0];
 
         // Atualizar dados do cliente baseado no tipo de pacote
+        // RF06 – Atualização de horas por plataforma
+        // RF08 – “Consumo de pacotes” reflete disponibilidade de horas nas sessões
         if (pacote.tempoadicionar) {
             // Adiciona tempo ao vip (dias)
             const clienteTempoVip = cliente.datafimvip 
@@ -211,6 +234,8 @@ exports.createClientePacote = async (req, res) => {
     }
 }
 
+// RF06 – Gerenciar pacotes: remover compra de pacote
+// RF08 – Impacta o controle de consumo e histórico
 // enviar do front a "data" já formatada para o banco
 exports.deleteClientePacote = async (req, res) => {
     if (!req.body.cpf || !req.body.pacote || !req.body.data) {
