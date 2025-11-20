@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import type { Maquina, UserData, Sessao } from "../../../API/APIClient";
+import type { Maquina, UserData, Sessao, Hardware } from "../../../API/APIClient";
 import type APIClient from "../../../API/APIClient";
 import {
     Table,
@@ -24,7 +24,21 @@ import {
     Drawer,
     IconButton,
     Tabs,
-    Tab
+    Tab,
+    Grid,
+    Tooltip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    List,
+    ListItem,
+    ListItemText,
+    ListItemSecondaryAction,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel
 } from "@mui/material";
 import { 
     Computer, 
@@ -36,7 +50,12 @@ import {
     AccessTime,
     Close,
     Info,
-    History
+    History,
+    ViewList,
+    ViewModule,
+    Memory,
+    Add,
+    Delete
 } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -49,6 +68,12 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
     const [tabValue, setTabValue] = useState(0);
     const [sessoes, setSessoes] = useState<Sessao[]>([]);
     const [loadingSessoes, setLoadingSessoes] = useState(false);
+    const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+    const [hardwares, setHardwares] = useState<Hardware[]>([]);
+    const [loadingHardwares, setLoadingHardwares] = useState(false);
+    const [addHardwareDialogOpen, setAddHardwareDialogOpen] = useState(false);
+    const [hardwaresDisponiveis, setHardwaresDisponiveis] = useState<Hardware[]>([]);
+    const [selectedHardwareId, setSelectedHardwareId] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchMaquinas = async () => {
@@ -79,6 +104,69 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                 .finally(() => setLoadingSessoes(false));
         }
     }, [selectedMaquina, tabValue, client]);
+
+    useEffect(() => {
+        if (selectedMaquina && tabValue === 2) {
+            setLoadingHardwares(true);
+            client.getHardwaresByMaquina(selectedMaquina.id)
+                .then(data => setHardwares(data))
+                .catch(error => {
+                    console.error('Erro ao carregar hardwares:', error);
+                    setHardwares([]);
+                })
+                .finally(() => setLoadingHardwares(false));
+        }
+    }, [selectedMaquina, tabValue, client]);
+
+    const loadHardwaresDisponiveis = async () => {
+        try {
+            const data = await client.getHardwaresDisponiveis();
+            setHardwaresDisponiveis(data);
+        } catch (error) {
+            console.error('Erro ao carregar hardwares disponíveis:', error);
+        }
+    };
+
+    const handleAddHardware = async () => {
+        if (!selectedMaquina || !selectedHardwareId) return;
+
+        try {
+            await client.addHardwareToMaquina({
+                maquinaId: selectedMaquina.id,
+                hardwareId: selectedHardwareId
+            });
+            
+            // Recarregar hardwares
+            const data = await client.getHardwaresByMaquina(selectedMaquina.id);
+            setHardwares(data);
+            
+            // Resetar e fechar dialog
+            setSelectedHardwareId(null);
+            setAddHardwareDialogOpen(false);
+            
+            // Recarregar hardwares disponíveis
+            loadHardwaresDisponiveis();
+        } catch (error) {
+            console.error('Erro ao adicionar hardware:', error);
+        }
+    };
+
+    const handleRemoveHardware = async (hardwareId: number) => {
+        if (!selectedMaquina) return;
+
+        try {
+            await client.removeHardwareFromMaquina(hardwareId);
+            
+            // Recarregar hardwares
+            const data = await client.getHardwaresByMaquina(selectedMaquina.id);
+            setHardwares(data);
+            
+            // Recarregar hardwares disponíveis
+            loadHardwaresDisponiveis();
+        } catch (error) {
+            console.error('Erro ao remover hardware:', error);
+        }
+    };
 
     const isActive = (lastseen?: Date) => {
         if (!lastseen) return false;
@@ -269,6 +357,25 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
 
                         <Box flex={1} />
 
+                        {/* Alternar Visualização */}
+                        <ToggleButtonGroup
+                            value={viewMode}
+                            exclusive
+                            onChange={(_e, value) => value && setViewMode(value)}
+                            size="small"
+                        >
+                            <ToggleButton value="table">
+                                <Tooltip title="Visualização em Lista">
+                                    <ViewList fontSize="small" />
+                                </Tooltip>
+                            </ToggleButton>
+                            <ToggleButton value="grid">
+                                <Tooltip title="Visualização em Mapa">
+                                    <ViewModule fontSize="small" />
+                                </Tooltip>
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+
                         {/* Contador */}
                         <Typography variant="body2" color="text.secondary">
                             {filteredMaquinas.length} máquina{filteredMaquinas.length !== 1 ? 's' : ''}
@@ -299,115 +406,261 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                 </motion.div>
             </Box>
 
-            {/* Tabela */}
+            {/* Visualizações */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
                 style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
             >
-                <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3, flex: 1, overflow: 'auto' }}>
-                    <Table sx={{ minWidth: 650 }} stickyHeader>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>ID</TableCell>
-                                <TableCell>Plataforma</TableCell>
-                                <TableCell align="center">Tipo</TableCell>
-                                <TableCell align="center">Status</TableCell>
-                                <TableCell align="center">Última Conexão</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {filteredMaquinas.map((maquina, index) => {
-                                const active = isActive(new Date(maquina.lastseen));
-                                return (
-                                    <TableRow
-                                        key={maquina.id}
-                                        component={motion.tr}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.05, duration: 0.3 }}
-                                        sx={{ 
-                                            '&:last-child td, &:last-child th': { border: 0 },
-                                            cursor: 'pointer'
-                                        }}
-                                        hover
-                                        onClick={() => setSelectedMaquina(maquina)}
-                                    >
-                                        <TableCell component="th" scope="row">
-                                            <Box display="flex" alignItems="center" gap={1}>
-                                                <Avatar sx={{ 
-                                                    width: 32, 
-                                                    height: 32, 
-                                                    bgcolor: active ? 'success.main' : 'grey.500' 
-                                                }}>
-                                                    {maquina.id}
-                                                </Avatar>
+                {viewMode === 'table' ? (
+                    /* Visualização em Tabela */
+                    <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3, flex: 1, overflow: 'auto' }}>
+                        <Table sx={{ minWidth: 650 }} stickyHeader>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>ID</TableCell>
+                                    <TableCell>Plataforma</TableCell>
+                                    <TableCell align="center">Tipo</TableCell>
+                                    <TableCell align="center">Status</TableCell>
+                                    <TableCell align="center">Última Conexão</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {filteredMaquinas.map((maquina, index) => {
+                                    const active = isActive(new Date(maquina.lastseen));
+                                    return (
+                                        <TableRow
+                                            key={maquina.id}
+                                            component={motion.tr}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: index * 0.05, duration: 0.3 }}
+                                            sx={{ 
+                                                '&:last-child td, &:last-child th': { border: 0 },
+                                                cursor: 'pointer'
+                                            }}
+                                            hover
+                                            onClick={() => setSelectedMaquina(maquina)}
+                                        >
+                                            <TableCell component="th" scope="row">
+                                                <Box display="flex" alignItems="center" gap={1}>
+                                                    <Avatar sx={{ 
+                                                        width: 32, 
+                                                        height: 32, 
+                                                        bgcolor: active ? 'success.main' : 'grey.500' 
+                                                    }}>
+                                                        {maquina.id}
+                                                    </Avatar>
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="body2" fontWeight="bold">
+                                                    {maquina.nomeplat}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Chip 
+                                                    icon={getTipoIcon(maquina.tipo)}
+                                                    label={getTipoLabel(maquina.tipo)} 
+                                                    size="small" 
+                                                    variant="outlined"
+                                                    color="primary"
+                                                />
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Chip 
+                                                    icon={<Circle sx={{ fontSize: 12, color: 'success' }} />}
+                                                    label={active ? 'Ativa' : 'Inativa'} 
+                                                    size="small" 
+                                                    color={active ? 'success' : 'default'}
+                                                />
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                {(() => {
+                                                    const lastSeen = formatLastSeen(new Date(maquina.lastseen));
+                                                    return (
+                                                        <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+                                                            {lastSeen.isOnline ? (
+                                                                <>
+                                                                    <Circle sx={{ fontSize: 10, color: 'success.main' }} />
+                                                                    <Typography variant="body2" fontWeight="bold" color="success.main">
+                                                                        {lastSeen.text}
+                                                                    </Typography>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <AccessTime fontSize="small" color="action" />
+                                                                    <Typography variant="body2">
+                                                                        {lastSeen.text}
+                                                                    </Typography>
+                                                                </>
+                                                            )}
+                                                        </Box>
+                                                    );
+                                                })()}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                                {filteredMaquinas.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={5}>
+                                            <Box textAlign="center" py={4}>
+                                                <Typography variant="h6" color="text.secondary">
+                                                    Nenhuma máquina encontrada
+                                                </Typography>
                                             </Box>
                                         </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2" fontWeight="bold">
-                                                {maquina.nomeplat}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Chip 
-                                                icon={getTipoIcon(maquina.tipo)}
-                                                label={getTipoLabel(maquina.tipo)} 
-                                                size="small" 
-                                                variant="outlined"
-                                                color="primary"
-                                            />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Chip 
-                                                icon={<Circle sx={{ fontSize: 12, color: 'success' }} />}
-                                                label={active ? 'Ativa' : 'Inativa'} 
-                                                size="small" 
-                                                color={active ? 'success' : 'default'}
-                                            />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            {(() => {
-                                                const lastSeen = formatLastSeen(new Date(maquina.lastseen));
-                                                return (
-                                                    <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
-                                                        {lastSeen.isOnline ? (
-                                                            <>
-                                                                <Circle sx={{ fontSize: 10, color: 'success.main' }} />
-                                                                <Typography variant="body2" fontWeight="bold" color="success.main">
-                                                                    {lastSeen.text}
-                                                                </Typography>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <AccessTime fontSize="small" color="action" />
-                                                                <Typography variant="body2">
-                                                                    {lastSeen.text}
-                                                                </Typography>
-                                                            </>
-                                                        )}
-                                                    </Box>
-                                                );
-                                            })()}
-                                        </TableCell>
                                     </TableRow>
-                                );
-                            })}
-                            {filteredMaquinas.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={5}>
-                                        <Box textAlign="center" py={4}>
-                                            <Typography variant="h6" color="text.secondary">
-                                                Nenhuma máquina encontrada
-                                            </Typography>
-                                        </Box>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                ) : (
+                    /* Visualização em Grid/Mapa */
+                    <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+                        {filteredMaquinas.length === 0 ? (
+                            <Box textAlign="center" py={8}>
+                                <Typography variant="h6" color="text.secondary">
+                                    Nenhuma máquina encontrada
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Grid container spacing={2}>
+                                {filteredMaquinas.map((maquina, index) => {
+                                    const active = isActive(new Date(maquina.lastseen));
+                                    const lastSeen = formatLastSeen(new Date(maquina.lastseen));
+                                    
+                                    return (
+                                        <Grid item xs={12} sm={6} md={4} lg={3} key={maquina.id}>
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ delay: index * 0.05, duration: 0.3 }}
+                                                whileHover={{ scale: 1.03 }}
+                                                whileTap={{ scale: 0.98 }}
+                                            >
+                                                <Card 
+                                                    sx={{ 
+                                                        cursor: 'pointer',
+                                                        height: '100%',
+                                                        position: 'relative',
+                                                        overflow: 'visible',
+                                                        border: active ? 2 : 1,
+                                                        borderColor: active ? 'success.main' : 'divider',
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            boxShadow: 6,
+                                                            borderColor: 'primary.main'
+                                                        }
+                                                    }}
+                                                    onClick={() => setSelectedMaquina(maquina)}
+                                                >
+                                                    {/* Badge de Status */}
+                                                    <Box
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            top: -8,
+                                                            right: -8,
+                                                            zIndex: 1
+                                                        }}
+                                                    >
+                                                        <Avatar
+                                                            sx={{
+                                                                width: 24,
+                                                                height: 24,
+                                                                bgcolor: active ? 'success.main' : 'grey.500',
+                                                                border: 2,
+                                                                borderColor: 'background.paper'
+                                                            }}
+                                                        >
+                                                            <Circle sx={{ fontSize: 12 }} />
+                                                        </Avatar>
+                                                    </Box>
+
+                                                    <CardContent sx={{ textAlign: 'center', pb: 2 }}>
+                                                        {/* Ícone Principal */}
+                                                        <Avatar
+                                                            sx={{
+                                                                width: 64,
+                                                                height: 64,
+                                                                margin: '0 auto 16px',
+                                                                bgcolor: active ? 'success.light' : 'grey.300',
+                                                                color: active ? 'success.dark' : 'grey.600'
+                                                            }}
+                                                        >
+                                                            {getTipoIcon(maquina.tipo)}
+                                                        </Avatar>
+
+                                                        {/* ID */}
+                                                        <Typography variant="h5" fontWeight="bold" gutterBottom>
+                                                            #{maquina.id}
+                                                        </Typography>
+
+                                                        {/* Nome da Plataforma */}
+                                                        <Typography 
+                                                            variant="body1" 
+                                                            color="text.secondary"
+                                                            gutterBottom
+                                                            sx={{
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap'
+                                                            }}
+                                                        >
+                                                            {maquina.nomeplat}
+                                                        </Typography>
+
+                                                        {/* Tipo */}
+                                                        <Box mt={2} mb={2}>
+                                                            <Chip
+                                                                icon={getTipoIcon(maquina.tipo)}
+                                                                label={getTipoLabel(maquina.tipo)}
+                                                                size="small"
+                                                                variant="outlined"
+                                                                color="primary"
+                                                            />
+                                                        </Box>
+
+                                                        {/* Status e Última Conexão */}
+                                                        <Box 
+                                                            display="flex" 
+                                                            alignItems="center" 
+                                                            justifyContent="center" 
+                                                            gap={0.5}
+                                                            mt={1}
+                                                        >
+                                                            {lastSeen.isOnline ? (
+                                                                <>
+                                                                    <Circle sx={{ fontSize: 8, color: 'success.main' }} />
+                                                                    <Typography 
+                                                                        variant="caption" 
+                                                                        fontWeight="bold" 
+                                                                        color="success.main"
+                                                                    >
+                                                                        {lastSeen.text}
+                                                                    </Typography>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <AccessTime sx={{ fontSize: 14 }} color="action" />
+                                                                    <Typography variant="caption" color="text.secondary">
+                                                                        {lastSeen.text}
+                                                                    </Typography>
+                                                                </>
+                                                            )}
+                                                        </Box>
+                                                    </CardContent>
+                                                </Card>
+                                            </motion.div>
+                                        </Grid>
+                                    );
+                                })}
+                            </Grid>
+                        )}
+                    </Box>
+                )}
             </motion.div>
 
             {/* Drawer de Detalhes */}
@@ -418,6 +671,7 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                     setSelectedMaquina(null);
                     setTabValue(0);
                     setSessoes([]);
+                    setHardwares([]);
                 }}
                 PaperProps={{
                     sx: { 
@@ -463,6 +717,7 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                     setSelectedMaquina(null);
                                     setTabValue(0);
                                     setSessoes([]);
+                                    setHardwares([]);
                                 }}>
                                     <Close />
                                 </IconButton>
@@ -482,6 +737,7 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                             >
                                 <Tab icon={<Info />} iconPosition="start" label="Detalhes" />
                                 <Tab icon={<History />} iconPosition="start" label="Sessões" />
+                                <Tab icon={<Memory />} iconPosition="start" label="Hardwares" />
                             </Tabs>
                         </motion.div>
 
@@ -651,10 +907,162 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                     )}
                                 </motion.div>
                             )}
+
+                            {tabValue === 2 && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    {loadingHardwares ? (
+                                        <Box display="flex" justifyContent="center" alignItems="center" py={8}>
+                                            <CircularProgress />
+                                        </Box>
+                                    ) : (
+                                        <>
+                                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                                                <Typography variant="h6">
+                                                    Hardwares Anexados
+                                                </Typography>
+                                                <Button
+                                                    variant="contained"
+                                                    startIcon={<Add />}
+                                                    onClick={() => setAddHardwareDialogOpen(true)}
+                                                    size="small"
+                                                >
+                                                    Adicionar Hardware
+                                                </Button>
+                                            </Box>
+
+                                            {hardwares.length === 0 ? (
+                                                <Box textAlign="center" py={8}>
+                                                    <Typography variant="h6" color="text.secondary">
+                                                        Nenhum hardware anexado
+                                                    </Typography>
+                                                </Box>
+                                            ) : (
+                                                <List>
+                                                    {hardwares.map((hardware, index) => (
+                                                        <motion.div
+                                                            key={hardware.hardwareid}
+                                                            initial={{ opacity: 0, x: -10 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            transition={{ delay: index * 0.05, duration: 0.2 }}
+                                                        >
+                                                            <ListItem
+                                                                component={Paper}
+                                                                sx={{ mb: 1, borderRadius: 1 }}
+                                                            >
+                                                                <ListItemText
+                                                                    primary={
+                                                                        <Box display="flex" alignItems="center" gap={1}>
+                                                                            <Memory color="primary" />
+                                                                            <Typography variant="body1" fontWeight="bold">
+                                                                                {hardware.hardwarenome}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    }
+                                                                    secondary={
+                                                                        <Box display="flex" gap={1} mt={0.5}>
+                                                                            <Chip 
+                                                                                label={hardware.hardwaretipo} 
+                                                                                size="small" 
+                                                                                variant="outlined"
+                                                                            />
+                                                                            <Chip 
+                                                                                label={hardware.hardwareestado} 
+                                                                                size="small" 
+                                                                                color={hardware.hardwareestado === 'ativo' ? 'success' : 'default'}
+                                                                            />
+                                                                        </Box>
+                                                                    }
+                                                                />
+                                                                <ListItemSecondaryAction>
+                                                                    <IconButton
+                                                                        edge="end"
+                                                                        onClick={() => handleRemoveHardware(hardware.hardwareid!)}
+                                                                        color="error"
+                                                                    >
+                                                                        <Delete />
+                                                                    </IconButton>
+                                                                </ListItemSecondaryAction>
+                                                            </ListItem>
+                                                        </motion.div>
+                                                    ))}
+                                                </List>
+                                            )}
+                                        </>
+                                    )}
+                                </motion.div>
+                            )}
                         </Box>
                     </Box>
                 )}
             </Drawer>
+
+            {/* Dialog para Adicionar Hardware */}
+            <Dialog 
+                open={addHardwareDialogOpen} 
+                onClose={() => {
+                    setAddHardwareDialogOpen(false);
+                    setSelectedHardwareId(null);
+                }}
+                onTransitionEnter={loadHardwaresDisponiveis}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Adicionar Hardware do Estoque</DialogTitle>
+                <DialogContent>
+                    <Box display="flex" flexDirection="column" gap={2} mt={2}>
+                        {hardwaresDisponiveis.length === 0 ? (
+                            <Typography variant="body2" color="text.secondary" textAlign="center" py={4}>
+                                Nenhum hardware disponível no estoque
+                            </Typography>
+                        ) : (
+                            <FormControl fullWidth required>
+                                <InputLabel>Selecione um Hardware</InputLabel>
+                                <Select
+                                    value={selectedHardwareId || ''}
+                                    label="Selecione um Hardware"
+                                    onChange={(e) => setSelectedHardwareId(Number(e.target.value))}
+                                >
+                                    {hardwaresDisponiveis.map((hw) => (
+                                        <MenuItem key={hw.hardwareid} value={hw.hardwareid}>
+                                            <Box display="flex" alignItems="center" gap={1} width="100%">
+                                                <Memory fontSize="small" />
+                                                <Typography flex={1}>
+                                                    {hw.hardwarenome}
+                                                </Typography>
+                                                <Chip label={hw.hardwaretipo} size="small" variant="outlined" />
+                                                <Chip 
+                                                    label={hw.hardwareestado} 
+                                                    size="small" 
+                                                    color={hw.hardwareestado === 'ativo' ? 'success' : 'default'}
+                                                />
+                                            </Box>
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        )}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {
+                        setAddHardwareDialogOpen(false);
+                        setSelectedHardwareId(null);
+                    }}>
+                        Cancelar
+                    </Button>
+                    <Button 
+                        onClick={handleAddHardware}
+                        variant="contained"
+                        disabled={!selectedHardwareId}
+                    >
+                        Adicionar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

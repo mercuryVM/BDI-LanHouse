@@ -89,3 +89,97 @@ exports.getMostFixedMaquinas = async (req, res) => {
         })
     })
 }
+
+// Listar hardwares disponíveis no estoque (sem máquina)
+exports.getHardwaresDisponiveis = async (req, res) => {
+    try {
+        const { rows } = await db.query(
+            `SELECT 
+                id,
+                nome,
+                estado,
+                tipo
+            FROM hardware
+            WHERE idmaquina IS NULL
+            ORDER BY nome`
+        );
+
+        res.status(200).send({
+            success: true,
+            message: "Hardwares disponíveis consultados com sucesso!",
+            data: rows.map((row) => ({
+                hardwareid: row.id,
+                hardwarenome: row.nome,
+                hardwareestado: row.estado,
+                hardwaretipo: row.tipo
+            }))
+        });
+    } catch (error) {
+        console.error("Erro ao buscar hardwares disponíveis:", error);
+        res.status(500).send({
+            success: false,
+            errors: ["Erro ao buscar hardwares disponíveis: " + error.message]
+        });
+    }
+}
+
+// Adicionar hardware a uma máquina (vincula um hardware do estoque)
+exports.addHardwareToMaquina = async (req, res) => {
+    const { maquinaId, hardwareId } = req.body;
+
+    try {
+        // Verifica se o hardware existe e está disponível
+        const checkResult = await db.query(
+            `SELECT * FROM hardware WHERE id = $1 AND idmaquina IS NULL`,
+            [hardwareId]
+        );
+
+        if (checkResult.rows.length === 0) {
+            return res.status(400).send({
+                success: false,
+                errors: ["Hardware não encontrado ou já está em uso"]
+            });
+        }
+
+        // Atualiza o hardware para vincular à máquina
+        const { rows } = await db.query(
+            `UPDATE hardware SET idmaquina = $1 WHERE id = $2 RETURNING *`,
+            [maquinaId, hardwareId]
+        );
+
+        res.status(200).send({
+            success: true,
+            message: "Hardware adicionado à máquina com sucesso!",
+            data: rows[0]
+        });
+    } catch (error) {
+        console.error("Erro ao adicionar hardware:", error);
+        res.status(500).send({
+            success: false,
+            errors: ["Erro ao adicionar hardware: " + error.message]
+        });
+    }
+}
+
+// Remover hardware de uma máquina (define idmaquina como NULL)
+exports.removeHardwareFromMaquina = async (req, res) => {
+    const { hardwareId } = req.body;
+
+    try {
+        await db.query(
+            `UPDATE hardware SET idmaquina = NULL WHERE id = $1`,
+            [hardwareId]
+        );
+
+        res.status(200).send({
+            success: true,
+            message: "Hardware removido da máquina com sucesso!"
+        });
+    } catch (error) {
+        console.error("Erro ao remover hardware:", error);
+        res.status(500).send({
+            success: false,
+            errors: ["Erro ao remover hardware: " + error.message]
+        });
+    }
+}

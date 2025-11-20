@@ -29,6 +29,7 @@ export const fetchUserData = createAsyncThunk(
             }
             return userData;
         } catch (error) {
+            console.error('Failed to fetch user data:', error);
             return rejectWithValue(
                 error instanceof Error ? error.message : 'Failed to fetch user data'
             );
@@ -87,8 +88,9 @@ const userDataSlice = createSlice({
         // Limpar dados do usuário
         clearUserData: (state) => {
             state.userData = null;
-            state.error = null;
+            state.error = 'User logged out';
             state.isTimerRunning = false;
+            state.isLoading = false;
         },
 
         // Atualizar dados específicos do usuário

@@ -14,6 +14,7 @@ import { Clientes } from "./Clientes";
 import { Sessoes } from "./Sessoes/Sessoes";
 import { Maquinas } from "./Maquinas";
 import { Pacotes } from "./Pacotes";
+import { Manutencao } from "./Manutencao";
 
 
 const tabs = [
@@ -55,7 +56,7 @@ const tabs = [
         label: "Manutenções",
         icon: <MaquinasIcon />,
         permission: 'clt',
-        renderer: Maquinas
+        renderer: Manutencao
     }
 ]
 
