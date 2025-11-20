@@ -10,6 +10,7 @@ import { GameCard } from "../../../Components/GameCard";
 import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { clearUserData } from "../../../store/slices/userDataSlice";
+import { useAppDispatch } from "../../../Hooks/reduxHooks";
 
 interface UserDataProps {
     userData: UserData | null
@@ -231,7 +232,7 @@ function Sidebar({ userData, client }: { userData: UserData | null, client: APIC
     const isClient = userData?.role === 'cliente';
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     const handleLogout = () => {
         setLoading(true);

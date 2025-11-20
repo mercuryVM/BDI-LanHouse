@@ -24,7 +24,9 @@ import {
     Drawer,
     IconButton,
     Tabs,
-    Tab
+    Tab,
+    Grid,
+    Tooltip
 } from "@mui/material";
 import { 
     Computer, 
@@ -36,7 +38,9 @@ import {
     AccessTime,
     Close,
     Info,
-    History
+    History,
+    ViewList,
+    ViewModule
 } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -49,6 +53,7 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
     const [tabValue, setTabValue] = useState(0);
     const [sessoes, setSessoes] = useState<Sessao[]>([]);
     const [loadingSessoes, setLoadingSessoes] = useState(false);
+    const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
     useEffect(() => {
         const fetchMaquinas = async () => {
@@ -269,6 +274,25 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
 
                         <Box flex={1} />
 
+                        {/* Alternar Visualização */}
+                        <ToggleButtonGroup
+                            value={viewMode}
+                            exclusive
+                            onChange={(_e, value) => value && setViewMode(value)}
+                            size="small"
+                        >
+                            <ToggleButton value="table">
+                                <Tooltip title="Visualização em Lista">
+                                    <ViewList fontSize="small" />
+                                </Tooltip>
+                            </ToggleButton>
+                            <ToggleButton value="grid">
+                                <Tooltip title="Visualização em Mapa">
+                                    <ViewModule fontSize="small" />
+                                </Tooltip>
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+
                         {/* Contador */}
                         <Typography variant="body2" color="text.secondary">
                             {filteredMaquinas.length} máquina{filteredMaquinas.length !== 1 ? 's' : ''}
@@ -299,115 +323,261 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                 </motion.div>
             </Box>
 
-            {/* Tabela */}
+            {/* Visualizações */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
                 style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
             >
-                <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3, flex: 1, overflow: 'auto' }}>
-                    <Table sx={{ minWidth: 650 }} stickyHeader>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>ID</TableCell>
-                                <TableCell>Plataforma</TableCell>
-                                <TableCell align="center">Tipo</TableCell>
-                                <TableCell align="center">Status</TableCell>
-                                <TableCell align="center">Última Conexão</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {filteredMaquinas.map((maquina, index) => {
-                                const active = isActive(new Date(maquina.lastseen));
-                                return (
-                                    <TableRow
-                                        key={maquina.id}
-                                        component={motion.tr}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.05, duration: 0.3 }}
-                                        sx={{ 
-                                            '&:last-child td, &:last-child th': { border: 0 },
-                                            cursor: 'pointer'
-                                        }}
-                                        hover
-                                        onClick={() => setSelectedMaquina(maquina)}
-                                    >
-                                        <TableCell component="th" scope="row">
-                                            <Box display="flex" alignItems="center" gap={1}>
-                                                <Avatar sx={{ 
-                                                    width: 32, 
-                                                    height: 32, 
-                                                    bgcolor: active ? 'success.main' : 'grey.500' 
-                                                }}>
-                                                    {maquina.id}
-                                                </Avatar>
+                {viewMode === 'table' ? (
+                    /* Visualização em Tabela */
+                    <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3, flex: 1, overflow: 'auto' }}>
+                        <Table sx={{ minWidth: 650 }} stickyHeader>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>ID</TableCell>
+                                    <TableCell>Plataforma</TableCell>
+                                    <TableCell align="center">Tipo</TableCell>
+                                    <TableCell align="center">Status</TableCell>
+                                    <TableCell align="center">Última Conexão</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {filteredMaquinas.map((maquina, index) => {
+                                    const active = isActive(new Date(maquina.lastseen));
+                                    return (
+                                        <TableRow
+                                            key={maquina.id}
+                                            component={motion.tr}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: index * 0.05, duration: 0.3 }}
+                                            sx={{ 
+                                                '&:last-child td, &:last-child th': { border: 0 },
+                                                cursor: 'pointer'
+                                            }}
+                                            hover
+                                            onClick={() => setSelectedMaquina(maquina)}
+                                        >
+                                            <TableCell component="th" scope="row">
+                                                <Box display="flex" alignItems="center" gap={1}>
+                                                    <Avatar sx={{ 
+                                                        width: 32, 
+                                                        height: 32, 
+                                                        bgcolor: active ? 'success.main' : 'grey.500' 
+                                                    }}>
+                                                        {maquina.id}
+                                                    </Avatar>
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="body2" fontWeight="bold">
+                                                    {maquina.nomeplat}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Chip 
+                                                    icon={getTipoIcon(maquina.tipo)}
+                                                    label={getTipoLabel(maquina.tipo)} 
+                                                    size="small" 
+                                                    variant="outlined"
+                                                    color="primary"
+                                                />
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Chip 
+                                                    icon={<Circle sx={{ fontSize: 12, color: 'success' }} />}
+                                                    label={active ? 'Ativa' : 'Inativa'} 
+                                                    size="small" 
+                                                    color={active ? 'success' : 'default'}
+                                                />
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                {(() => {
+                                                    const lastSeen = formatLastSeen(new Date(maquina.lastseen));
+                                                    return (
+                                                        <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+                                                            {lastSeen.isOnline ? (
+                                                                <>
+                                                                    <Circle sx={{ fontSize: 10, color: 'success.main' }} />
+                                                                    <Typography variant="body2" fontWeight="bold" color="success.main">
+                                                                        {lastSeen.text}
+                                                                    </Typography>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <AccessTime fontSize="small" color="action" />
+                                                                    <Typography variant="body2">
+                                                                        {lastSeen.text}
+                                                                    </Typography>
+                                                                </>
+                                                            )}
+                                                        </Box>
+                                                    );
+                                                })()}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                                {filteredMaquinas.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={5}>
+                                            <Box textAlign="center" py={4}>
+                                                <Typography variant="h6" color="text.secondary">
+                                                    Nenhuma máquina encontrada
+                                                </Typography>
                                             </Box>
                                         </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2" fontWeight="bold">
-                                                {maquina.nomeplat}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Chip 
-                                                icon={getTipoIcon(maquina.tipo)}
-                                                label={getTipoLabel(maquina.tipo)} 
-                                                size="small" 
-                                                variant="outlined"
-                                                color="primary"
-                                            />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Chip 
-                                                icon={<Circle sx={{ fontSize: 12, color: 'success' }} />}
-                                                label={active ? 'Ativa' : 'Inativa'} 
-                                                size="small" 
-                                                color={active ? 'success' : 'default'}
-                                            />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            {(() => {
-                                                const lastSeen = formatLastSeen(new Date(maquina.lastseen));
-                                                return (
-                                                    <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
-                                                        {lastSeen.isOnline ? (
-                                                            <>
-                                                                <Circle sx={{ fontSize: 10, color: 'success.main' }} />
-                                                                <Typography variant="body2" fontWeight="bold" color="success.main">
-                                                                    {lastSeen.text}
-                                                                </Typography>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <AccessTime fontSize="small" color="action" />
-                                                                <Typography variant="body2">
-                                                                    {lastSeen.text}
-                                                                </Typography>
-                                                            </>
-                                                        )}
-                                                    </Box>
-                                                );
-                                            })()}
-                                        </TableCell>
                                     </TableRow>
-                                );
-                            })}
-                            {filteredMaquinas.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={5}>
-                                        <Box textAlign="center" py={4}>
-                                            <Typography variant="h6" color="text.secondary">
-                                                Nenhuma máquina encontrada
-                                            </Typography>
-                                        </Box>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                ) : (
+                    /* Visualização em Grid/Mapa */
+                    <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+                        {filteredMaquinas.length === 0 ? (
+                            <Box textAlign="center" py={8}>
+                                <Typography variant="h6" color="text.secondary">
+                                    Nenhuma máquina encontrada
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Grid container spacing={2}>
+                                {filteredMaquinas.map((maquina, index) => {
+                                    const active = isActive(new Date(maquina.lastseen));
+                                    const lastSeen = formatLastSeen(new Date(maquina.lastseen));
+                                    
+                                    return (
+                                        <Grid item xs={12} sm={6} md={4} lg={3} key={maquina.id}>
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ delay: index * 0.05, duration: 0.3 }}
+                                                whileHover={{ scale: 1.03 }}
+                                                whileTap={{ scale: 0.98 }}
+                                            >
+                                                <Card 
+                                                    sx={{ 
+                                                        cursor: 'pointer',
+                                                        height: '100%',
+                                                        position: 'relative',
+                                                        overflow: 'visible',
+                                                        border: active ? 2 : 1,
+                                                        borderColor: active ? 'success.main' : 'divider',
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            boxShadow: 6,
+                                                            borderColor: 'primary.main'
+                                                        }
+                                                    }}
+                                                    onClick={() => setSelectedMaquina(maquina)}
+                                                >
+                                                    {/* Badge de Status */}
+                                                    <Box
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            top: -8,
+                                                            right: -8,
+                                                            zIndex: 1
+                                                        }}
+                                                    >
+                                                        <Avatar
+                                                            sx={{
+                                                                width: 24,
+                                                                height: 24,
+                                                                bgcolor: active ? 'success.main' : 'grey.500',
+                                                                border: 2,
+                                                                borderColor: 'background.paper'
+                                                            }}
+                                                        >
+                                                            <Circle sx={{ fontSize: 12 }} />
+                                                        </Avatar>
+                                                    </Box>
+
+                                                    <CardContent sx={{ textAlign: 'center', pb: 2 }}>
+                                                        {/* Ícone Principal */}
+                                                        <Avatar
+                                                            sx={{
+                                                                width: 64,
+                                                                height: 64,
+                                                                margin: '0 auto 16px',
+                                                                bgcolor: active ? 'success.light' : 'grey.300',
+                                                                color: active ? 'success.dark' : 'grey.600'
+                                                            }}
+                                                        >
+                                                            {getTipoIcon(maquina.tipo)}
+                                                        </Avatar>
+
+                                                        {/* ID */}
+                                                        <Typography variant="h5" fontWeight="bold" gutterBottom>
+                                                            #{maquina.id}
+                                                        </Typography>
+
+                                                        {/* Nome da Plataforma */}
+                                                        <Typography 
+                                                            variant="body1" 
+                                                            color="text.secondary"
+                                                            gutterBottom
+                                                            sx={{
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap'
+                                                            }}
+                                                        >
+                                                            {maquina.nomeplat}
+                                                        </Typography>
+
+                                                        {/* Tipo */}
+                                                        <Box mt={2} mb={2}>
+                                                            <Chip
+                                                                icon={getTipoIcon(maquina.tipo)}
+                                                                label={getTipoLabel(maquina.tipo)}
+                                                                size="small"
+                                                                variant="outlined"
+                                                                color="primary"
+                                                            />
+                                                        </Box>
+
+                                                        {/* Status e Última Conexão */}
+                                                        <Box 
+                                                            display="flex" 
+                                                            alignItems="center" 
+                                                            justifyContent="center" 
+                                                            gap={0.5}
+                                                            mt={1}
+                                                        >
+                                                            {lastSeen.isOnline ? (
+                                                                <>
+                                                                    <Circle sx={{ fontSize: 8, color: 'success.main' }} />
+                                                                    <Typography 
+                                                                        variant="caption" 
+                                                                        fontWeight="bold" 
+                                                                        color="success.main"
+                                                                    >
+                                                                        {lastSeen.text}
+                                                                    </Typography>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <AccessTime sx={{ fontSize: 14 }} color="action" />
+                                                                    <Typography variant="caption" color="text.secondary">
+                                                                        {lastSeen.text}
+                                                                    </Typography>
+                                                                </>
+                                                            )}
+                                                        </Box>
+                                                    </CardContent>
+                                                </Card>
+                                            </motion.div>
+                                        </Grid>
+                                    );
+                                })}
+                            </Grid>
+                        )}
+                    </Box>
+                )}
             </motion.div>
 
             {/* Drawer de Detalhes */}

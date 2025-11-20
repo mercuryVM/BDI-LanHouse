@@ -53,7 +53,7 @@ exports.getAllPacotes = async (req, res) => {
 // Requisitos de dados: clientePacote registra compras de pacotes (cliente, pacote, data).
 exports.getAllClientePacotes = async (req, res) => {
     const { rows } = await db.query(
-        "SELECT c.cpf, p.id as pacId, cp.datatempo, c.nome as cliNome, p.nome as pacNome, p.preco, o.tempocomputador, o.tempoconsole, o.temposimulador, pv.tempoadicionar " +
+        "SELECT c.cpf, p.id as pacId, cp.datatempo, cp.descontoaplicado, c.nome as cliNome, p.nome as pacNome, p.preco, o.tempocomputador, o.tempoconsole, o.temposimulador, pv.tempoadicionar " +
         "FROM clientePacote cp " +
         "INNER JOIN cliente c ON (cp.cliente = c.cpf) " +
         "INNER JOIN pacote p ON (cp.pacote = p.id) " +
@@ -131,6 +131,7 @@ exports.createClientePacote = async (req, res) => {
     const cpf = req.body.cpf;
     const pacoteId = req.body.pacote;
     const data = req.body.data ? req.body.data : new Date().toISOString();
+    const descontoaplicado = req.body.descontoaplicado || false;
 
     const client = await db.connect();
 
@@ -211,8 +212,8 @@ exports.createClientePacote = async (req, res) => {
 
         // Inserir o registro de compra do pacote
         await client.query(
-            "INSERT INTO clientePacote (cliente, pacote, datatempo) VALUES ($1, $2, $3)",
-            [cpf, pacoteId, data]
+            "INSERT INTO clientePacote (cliente, pacote, datatempo, descontoaplicado) VALUES ($1, $2, $3, $4)",
+            [cpf, pacoteId, data, descontoaplicado || false]
         );
 
         await client.query('COMMIT');

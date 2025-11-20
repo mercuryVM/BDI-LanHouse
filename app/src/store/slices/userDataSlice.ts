@@ -29,6 +29,7 @@ export const fetchUserData = createAsyncThunk(
             }
             return userData;
         } catch (error) {
+            console.error('Failed to fetch user data:', error);
             return rejectWithValue(
                 error instanceof Error ? error.message : 'Failed to fetch user data'
             );

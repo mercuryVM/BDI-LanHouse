@@ -322,10 +322,10 @@ export function Manutencao({ client }: { client: APIClient, userData: UserData |
                                     </TableCell>
                                     <TableCell>
                                         <Chip
-                                            icon={getPrioridadeIcon(manutencao.manutecaoprioridade)}
-                                            label={manutencao.manutecaoprioridade}
+                                            icon={getPrioridadeIcon(manutencao.manutencaoprioridade)}
+                                            label={manutencao.manutencaoprioridade}
                                             size="small"
-                                            color={getPrioridadeColor(manutencao.manutecaoprioridade)}
+                                            color={getPrioridadeColor(manutencao.manutencaoprioridade)}
                                             variant="outlined"
                                         />
                                     </TableCell>
@@ -408,9 +408,9 @@ export function Manutencao({ client }: { client: APIClient, userData: UserData |
                                 </Typography>
                                 <Box mt={0.5}>
                                     <Chip
-                                        icon={getPrioridadeIcon(selectedManutencao.manutecaoprioridade)}
-                                        label={selectedManutencao.manutecaoprioridade}
-                                        color={getPrioridadeColor(selectedManutencao.manutecaoprioridade)}
+                                        icon={getPrioridadeIcon(selectedManutencao.manutencaoprioridade)}
+                                        label={selectedManutencao.manutencaoprioridade}
+                                        color={getPrioridadeColor(selectedManutencao.manutencaoprioridade)}
                                     />
                                 </Box>
                             </Box>

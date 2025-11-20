@@ -37,6 +37,7 @@ export interface Pacote {
     tempocomputador?: number;
     tempoconsole?: number;
     temposimulador?: number;
+    descontoaplicado?: boolean;
 }
 
 export interface PacoteInfo {
@@ -96,7 +97,7 @@ export interface Sessao {
 export interface Manutencao {
     manutencaoid: number;
     manutencaotipo: string;
-    manutecaoprioridade: string;
+    manutencaoprioridade: string;
     manutencaodatatempoinicio: Date;
     maquinaid: number;
     nomeplat: string;
@@ -120,16 +121,12 @@ export default class APIClient {
     }
 
     async getUserData(): Promise<UserData | null> {
-        if (this.userData) {
-            return this.userData;
-        }
         try {
             const userData = await this.get<UserData>('/user');
             this.userData = userData;
             return userData;
         } catch (error) {
-            console.error('Failed to get user data:', error);
-            return null;
+            throw error;
         }
     }
 
@@ -201,7 +198,7 @@ export default class APIClient {
     async login(username: string, password: string, maquina: number): Promise<string> {
         try {
             const token = await this.post<string>('/login', { username, password, maquina });
-
+            console.log('Login successful, received token:', token);    
             this.token = token;
 
             return token;
@@ -319,9 +316,9 @@ export default class APIClient {
         }
     }
 
-    async createClientePacote(cpf: string, pacote: number, data?: string): Promise<ApiResponse> {
+    async createClientePacote(cpf: string, pacote: number, data?: string, descontoaplicado?: boolean): Promise<ApiResponse> {
         try {
-            const response = await this.postRaw('/createClientePacote', { cpf, pacote, data });
+            const response = await this.postRaw('/createClientePacote', { cpf, pacote, data, descontoaplicado });
             return response;
         } catch (error) {
             throw this.handleError(error);

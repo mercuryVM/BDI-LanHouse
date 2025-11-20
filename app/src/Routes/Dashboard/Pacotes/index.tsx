@@ -135,7 +135,9 @@ export function Pacotes({ client }: { client: APIClient, userData: UserData | nu
         try {
             const response = await client.createClientePacote(
                 selectedCliente.cpf,
-                selectedPacote
+                selectedPacote,
+                undefined,
+                isClienteNovo
             );
 
             if (response.success) {
@@ -195,7 +197,29 @@ export function Pacotes({ client }: { client: APIClient, userData: UserData | nu
         // Clientes únicos
         const clientesUnicos = new Set(pacotes.map(p => p.cpf)).size;
 
-        return { total, vip, ordinarios, precoMedio, receitaTotal, clientesUnicos };
+        // Descontos aplicados
+        const descontosAplicados = pacotes.filter(p => p.descontoaplicado).length;
+        
+        // Economia total (10% de desconto em cada pacote com desconto)
+        const economiaTotalDesconto = pacotes
+            .filter(p => p.descontoaplicado)
+            .reduce((sum, p) => {
+                // O preço já está com desconto, então calculamos o original
+                const precoOriginal = Number(p.preco) / 0.9;
+                const economia = precoOriginal - Number(p.preco);
+                return sum + economia;
+            }, 0);
+
+        return { 
+            total, 
+            vip, 
+            ordinarios, 
+            precoMedio, 
+            receitaTotal, 
+            clientesUnicos,
+            descontosAplicados,
+            economiaTotalDesconto
+        };
     }, [pacotes]);
 
     // Filtra pacotes
@@ -279,6 +303,7 @@ export function Pacotes({ client }: { client: APIClient, userData: UserData | nu
                             <Typography variant="body2" color="text.secondary">Ticket Médio</Typography>
                         </CardContent>
                     </Card>
+                   
                 </Box>
             </motion.div>
 
@@ -371,6 +396,7 @@ export function Pacotes({ client }: { client: APIClient, userData: UserData | nu
                                 <TableCell align="center">Tipo</TableCell>
                                 <TableCell align="center">Data</TableCell>
                                 <TableCell align="right">Preço</TableCell>
+                                <TableCell align="center">Desconto</TableCell>
                                 <TableCell>Detalhes</TableCell>
                             </TableRow>
                         </TableHead>
@@ -434,6 +460,20 @@ export function Pacotes({ client }: { client: APIClient, userData: UserData | nu
                                                 </Typography>
                                             </Box>
                                         </TableCell>
+                                        <TableCell align="center">
+                                            {pacote.descontoaplicado ? (
+                                                <Chip
+                                                    label="10% OFF"
+                                                    size="small"
+                                                    color="secondary"
+                                                    sx={{ fontWeight: 'bold' }}
+                                                />
+                                            ) : (
+                                                <Typography variant="body2" color="text.secondary">
+                                                    -
+                                                </Typography>
+                                            )}
+                                        </TableCell>
                                         <TableCell>
                                             {isVip ? (
                                                 <Chip
@@ -472,7 +512,7 @@ export function Pacotes({ client }: { client: APIClient, userData: UserData | nu
                             })}
                             {filteredPacotes.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={5}>
+                                    <TableCell colSpan={7}>
                                         <Box textAlign="center" py={4}>
                                             <Typography variant="h6" color="text.secondary">
                                                 Nenhum pacote encontrado

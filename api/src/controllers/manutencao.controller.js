@@ -120,18 +120,7 @@ exports.getManutencoes = async (req, res) => {
     res.status(200).send({
         success: true,
         message: "Manutencões consultadas com sucesso!",
-        data: rows.map((row) => {
-            return {
-                manutencaoID: row.manutencaoID,
-                manutencaoTipo: row.manutencaoTipo,
-                manutecaoPrioridade: row.manutecaoPrioridade,
-                manutencaodatatempoinicio: row.manutencaodatatempoinicio,
-                maquinaID: row.maquinaID,
-                nomePlat: row.nomePlat,
-                tipoPlat: row.tipoPlat,
-                nomeFuncionario: row.nomeFuncionario,
-            }
-        })
+        data: rows
 
     });
 };
