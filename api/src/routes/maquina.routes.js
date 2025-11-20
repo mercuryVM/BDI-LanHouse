@@ -9,5 +9,8 @@ router.get('/getAllMaquinas', authMiddleware, maquinaController.getAllMaquinas);
 router.get('/getHardwaresDisponiveis', authMiddleware, maquinaController.getHardwaresDisponiveis);
 router.post('/addHardwareToMaquina', authMiddleware, authRequireType(['funcionario']), maquinaController.addHardwareToMaquina);
 router.post('/removeHardwareFromMaquina', authMiddleware, authRequireType(['funcionario']), maquinaController.removeHardwareFromMaquina);
+router.get('/listarMaquinasDisponiveis', maquinaController.listarMaquinasDisponiveis);
+router.get('/contarMaquinasDisponiveisPorTipo', maquinaController.contarMaquinasDisponiveisPorTipo);
+router.get('/contarMaquinasDisponiveisPorPlataforma', maquinaController.contarMaquinasDisponiveisPorPlataforma);
 
 module.exports = router;
