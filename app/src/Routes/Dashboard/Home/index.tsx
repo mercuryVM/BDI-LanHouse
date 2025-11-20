@@ -3,7 +3,7 @@ import type APIClient from "../../../API/APIClient";
 import styles from './index.module.css';
 import React, { useEffect } from 'react';
 import { Box, Button, Card, CardContent, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography, Chip, Paper, Grid, Divider } from "@mui/material";
-import { AccessTime, TrendingUp, People, Schedule, EventBusy, EmojiEvents } from "@mui/icons-material";
+import { AccessTime, TrendingUp, People, Schedule, EventBusy, EmojiEvents, Computer, SportsEsports, DirectionsCar, Lightbulb } from "@mui/icons-material";
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
 import { GameCard } from "../../../Components/GameCard";
@@ -163,10 +163,10 @@ function MaquinasProblematicas({ client }: { client: APIClient }) {
 
     const getTipoIcon = (tipo: number) => {
         switch (tipo) {
-            case 0: return '🖥️';
-            case 1: return '🎮';
-            case 2: return '🏎️';
-            default: return '💻';
+            case 0: return <Computer sx={{ fontSize: 20 }} />;
+            case 1: return <SportsEsports sx={{ fontSize: 20 }} />;
+            case 2: return <DirectionsCar sx={{ fontSize: 20 }} />;
+            default: return <Computer sx={{ fontSize: 20 }} />;
         }
     };
 
@@ -246,16 +246,6 @@ function MaquinasProblematicas({ client }: { client: APIClient }) {
                                                 variant="outlined"
                                             />
                                         </Box>
-                                        <Box>
-                                            <Typography variant="body2" color="text.secondary">
-                                                Necessita análise detalhada e possível substituição
-                                            </Typography>
-                                            {maq.diasMenorIntervalo && (
-                                                <Typography variant="caption" color="error.main" fontWeight="bold">
-                                                    ⚠️ Menor intervalo: {maq.diasMenorIntervalo} {maq.diasMenorIntervalo === 1 ? 'dia' : 'dias'}
-                                                </Typography>
-                                            )}
-                                        </Box>
                                     </Box>
 
                                     {/* Contador de Manutenções */}
@@ -279,14 +269,17 @@ function MaquinasProblematicas({ client }: { client: APIClient }) {
                     <Divider sx={{ my: 2 }} />
 
                     <Box display="flex" alignItems="center" gap={1}>
-                        <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-                            💡 <strong>Ação recomendada:</strong> Falhas frequentes em curto período indicam defeito grave - considere substituição
-                        </Typography>
+                        <Box display="flex" alignItems="center" gap={1} flex={1}>
+                            <Lightbulb color="warning" />
+                            <Typography variant="body2" color="text.secondary">
+                                <strong>Ação recomendada:</strong> Falhas frequentes em curto período indicam defeito grave - considere substituição
+                            </Typography>
+                        </Box>
                         <Button 
                             variant="outlined" 
                             color="error" 
                             size="small"
-                            onClick={() => navigate('/dashboard?tab=maquinas')}
+                            onClick={() => navigate('/dashboard?tab=máquinas')}
                         >
                             Ver Todas
                         </Button>
