@@ -214,3 +214,81 @@ exports.removeHardwareFromMaquina = async (req, res) => {
         });
     }
 }
+
+exports.listarMaquinasDisponiveis = async (req, res) => {
+    const {rows} = await db.query(`
+        SELECT m.id, p.nome, p.tipo FROM maquina m JOIN plataforma p ON p.nome = m.nomePlat WHERE id NOT IN (
+            SELECT mm.idMaquina FROM manutencao m JOIN agendamento a ON (m.id = a.id) JOIN manutencaoMaquina mm ON (mm.idManutencao = m.id) WHERE datatempofim IS NULL GROUP BY mm.idMaquina
+                UNION
+            SELECT maquina as idMaquina FROM sessao WHERE datatempofim IS NULL GROUP BY maquina
+        ) ORDER BY m.id;    
+    `);
+
+    if(rows.length > 0){
+        res.status(200).send({
+            success: true,
+            data: rows,
+            message: "Máquina(s) encontrada(s)"
+        });
+        return;
+    }
+    else{
+        res.status(404).send({
+            success: false,
+            message: "Nenhuma máquina encontrada"
+        });
+        return;
+    }
+}
+
+exports.contarMaquinasDisponiveisPorTipo = async (req, res) => {
+    const {rows} = await db.query(`
+        SELECT p.tipo, COUNT(m.id) as disponiveis FROM maquina m JOIN plataforma p ON p.nome = m.nomePlat WHERE id NOT IN (
+            SELECT mm.idMaquina FROM manutencao m JOIN agendamento a ON (m.id = a.id) JOIN manutencaoMaquina mm ON (mm.idManutencao = m.id) WHERE datatempofim IS NULL GROUP BY mm.idMaquina
+                UNION
+            SELECT maquina as idMaquina FROM sessao WHERE datatempofim IS NULL GROUP BY maquina
+        ) GROUP BY p.tipo ORDER BY p.tipo;    
+    `);
+
+    if(rows.length > 0){
+        res.status(200).send({
+            success: true,
+            data: rows,
+            message: "Máquina(s) encontrada(s)"
+        });
+        return;
+    }
+    else{
+        res.status(404).send({
+            success: false,
+            message: "Nenhuma máquina encontrada"
+        });
+        return;
+    }
+}
+
+exports.contarMaquinasDisponiveisPorPlataforma = async (req, res) => {
+    const {rows} = await db.query(`
+        SELECT p.nome, p.tipo, COUNT(m.id) as disponiveis FROM maquina m JOIN plataforma p ON p.nome = m.nomePlat WHERE id NOT IN (
+            SELECT mm.idMaquina FROM manutencao m JOIN agendamento a ON (m.id = a.id) JOIN manutencaoMaquina mm ON (mm.idManutencao = m.id) WHERE datatempofim IS NULL GROUP BY mm.idMaquina
+                UNION
+            SELECT maquina as idMaquina FROM sessao WHERE datatempofim IS NULL GROUP BY maquina
+        ) GROUP BY p.nome, p.tipo ORDER BY p.tipo;
+    `);
+
+    if(rows.length > 0){
+        res.status(200).send({
+            success: true,
+            data: rows,
+            message: "Máquina(s) encontrada(s)"
+        });
+        return;
+    }
+    else{
+        res.status(404).send({
+            success: false,
+            message: "Nenhuma máquina encontrada"
+        });
+        return;
+    }
+}
