@@ -198,26 +198,7 @@ exports.getRecentJogos = async (req, res) => {
 // • Calcula horário de maior pico por jogo
 // • Atende: "tendências", "horários de pico", "tempo médio" (Domínio)
 exports.getMostPlayedJogos = async (req, res) => {
-
-    //TODO: colocar datatimefim em sessaojogo (banco e cod
-    /*
-    WITH sessoes_por_jogo AS (
-    SELECT 
-        j.id AS jogo_id,
-        j.nome,
-        j.descricao,
-        j.urlimagem,
-        j.idaderecomendada,
-        j.inicializacao,
-        j.multiplayer,
-        COUNT(*) AS numero_sessoes,
-        AVG(EXTRACT(EPOCH FROM (s.datatempofim - s.datatempoinicio)) / 60) 
-            AS tempo_medio_minutos
-    FROM sessaojogo s
-    JOIN jogo j ON j.id = s.jogo
-    GROUP BY j.id
-),
-    */
+    
 
     const { rows } = await db.query(
         `WITH sessoes_por_jogo AS (
@@ -229,7 +210,9 @@ exports.getMostPlayedJogos = async (req, res) => {
                 j.idaderecomendada,
                 j.inicializacao,
                 j.multiplayer,
-                COUNT(*) AS numero_sessoes
+                COUNT(*) AS numero_sessoes,
+                AVG(EXTRACT(EPOCH FROM (s.datatempofim - s.datatempoinicio)) / 60) 
+                    AS tempo_medio_minutos
             FROM sessaojogo s
             JOIN jogo j ON j.id = s.jogo
             GROUP BY j.id
