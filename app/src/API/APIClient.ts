@@ -320,6 +320,27 @@ export default class APIClient {
         }
     }
 
+    async getMostFixedMaquinas(): Promise<{
+        vezesConsertada: number;
+        id: number;
+        nomePlataforma: string;
+        tipoPlataforma: number;
+        diasMenorIntervalo?: number;
+    }[]> {
+        try {
+            const result = await this.get<{
+                vezesConsertada: number;
+                id: number;
+                nomePlataforma: string;
+                tipoPlataforma: number;
+                diasMenorIntervalo?: number;
+            }[]>('/getMostFixedMaquinas');
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     async getHardwaresDisponiveis(): Promise<Hardware[]> {
         try {
             const hardwares = await this.get<Hardware[]>('/getHardwaresDisponiveis');

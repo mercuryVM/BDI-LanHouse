@@ -27,10 +27,11 @@ export function Home({ client, userData }: { client: APIClient, userData: UserDa
                 {isClient && <VIPStatus userData={userData} />}
                 {isClient && <LastGames userData={userData} client={client} />}
                 {isCLT && <MostPlayedGames client={client} />}
+                {isCLT && <MaquinasProblematicas client={client} />}
                 {isCLT && <ClienteStats client={client} />}
             </div>
 
-            <Sidebar client={client} userData={userData} />
+            {isClient && (<Sidebar client={client} userData={userData} />)}
         </div>
     )
 }
@@ -132,6 +133,168 @@ function LastGames({ client }: { userData: UserData | null, client: APIClient })
             </div>
         </div>
     )
+}
+
+function MaquinasProblematicas({ client }: { client: APIClient }) {
+    const navigate = useNavigate();
+    const [maquinas, setMaquinas] = React.useState<{
+        vezesConsertada: number;
+        id: number;
+        nomePlataforma: string;
+        tipoPlataforma: number;
+        diasMenorIntervalo?: number;
+    }[]>([]);
+    const [loading, setLoading] = React.useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await client.getMostFixedMaquinas();
+                setMaquinas(data.slice(0, 5)); // Mostra apenas as 5 piores
+            } catch (error) {
+                console.error('Erro ao carregar máquinas problemáticas:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [client]);
+
+    const getTipoIcon = (tipo: number) => {
+        switch (tipo) {
+            case 0: return '🖥️';
+            case 1: return '🎮';
+            case 2: return '🏎️';
+            default: return '💻';
+        }
+    };
+
+    if (loading) {
+        return (
+            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (maquinas.length === 0) {
+        return null;
+    }
+
+    return (
+        <Box sx={{ mt: 4 }}>
+            <Typography variant="h5" gutterBottom sx={{ mb: 2, fontWeight: 600, color: 'error.main' }}>
+                ⚠️ Máquinas com Falhas Recorrentes
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Equipamentos com mais de 1 falha em menos de 30 dias - requerem atenção urgente
+            </Typography>
+
+            <Card 
+                elevation={3}
+                sx={{ 
+                    bgcolor: 'error.lighter',
+                    border: '2px solid',
+                    borderColor: 'error.light'
+                }}
+            >
+                <CardContent>
+                    <Box display="flex" flexDirection="column" gap={2}>
+                        {maquinas.map((maq, index) => (
+                            <Paper
+                                key={maq.id}
+                                elevation={2}
+                                sx={{
+                                    p: 2,
+                                    bgcolor: 'background.paper',
+                                    transition: 'all 0.2s',
+                                    '&:hover': {
+                                        transform: 'translateX(8px)',
+                                        boxShadow: 4
+                                    }
+                                }}
+                            >
+                                <Box display="flex" alignItems="center" gap={2}>
+                                    {/* Ícone de Alerta */}
+                                    <Box
+                                        sx={{
+                                            width: 48,
+                                            height: 48,
+                                            borderRadius: '50%',
+                                            bgcolor: 'error.main',
+                                            color: 'white',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '24px',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        {index + 1}
+                                    </Box>
+
+                                    {/* Info da Máquina */}
+                                    <Box flex={1}>
+                                        <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+                                            <Typography variant="h6" fontWeight="bold">
+                                                {getTipoIcon(maq.tipoPlataforma)} {maq.nomePlataforma}
+                                            </Typography>
+                                            <Chip 
+                                                label={`ID: ${maq.id}`} 
+                                                size="small" 
+                                                variant="outlined"
+                                            />
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Necessita análise detalhada e possível substituição
+                                            </Typography>
+                                            {maq.diasMenorIntervalo && (
+                                                <Typography variant="caption" color="error.main" fontWeight="bold">
+                                                    ⚠️ Menor intervalo: {maq.diasMenorIntervalo} {maq.diasMenorIntervalo === 1 ? 'dia' : 'dias'}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    </Box>
+
+                                    {/* Contador de Manutenções */}
+                                    <Box textAlign="center">
+                                        <Typography 
+                                            variant="h4" 
+                                            fontWeight="bold" 
+                                            color="error.main"
+                                        >
+                                            {maq.vezesConsertada}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            {maq.vezesConsertada === 1 ? 'falha' : 'falhas'} em 30 dias
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Paper>
+                        ))}
+                    </Box>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+                            💡 <strong>Ação recomendada:</strong> Falhas frequentes em curto período indicam defeito grave - considere substituição
+                        </Typography>
+                        <Button 
+                            variant="outlined" 
+                            color="error" 
+                            size="small"
+                            onClick={() => navigate('/dashboard?tab=maquinas')}
+                        >
+                            Ver Todas
+                        </Button>
+                    </Box>
+                </CardContent>
+            </Card>
+        </Box>
+    );
 }
 
 function ClienteStats({ client }: { client: APIClient }) {

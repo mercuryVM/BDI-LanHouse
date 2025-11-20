@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router";
 import type { Sessao } from "../../../API/APIClient";
 import type APIClient from "../../../API/APIClient";
 import type { UserData } from "../../../API/APIClient";
@@ -25,10 +26,15 @@ import { Person, AccessTime, Schedule, Search, FilterList, CheckCircle, PlayArro
 import { motion, AnimatePresence } from "framer-motion";
 
 export function Sessoes({ client }: { client: APIClient, userData: UserData | null }) {
+    const navigate = useNavigate();
     const [sessoes, setSessoes] = useState<Sessao[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
+
+    const handleClienteClick = (cpf: string) => {
+        navigate(`/dashboard?tab=clientes&cpf=${cpf}`);
+    };
 
     useEffect(() => {
         const fetchSessoes = async () => {
@@ -215,12 +221,29 @@ export function Sessoes({ client }: { client: APIClient, userData: UserData | nu
                                         hover
                                     >
                                 <TableCell component="th" scope="row">
-                                    <Box display="flex" alignItems="center" gap={1}>
+                                    <Box 
+                                        display="flex" 
+                                        alignItems="center" 
+                                        gap={1}
+                                        onClick={() => handleClienteClick(sessao.cliente.cpf || '')}
+                                        sx={{ 
+                                            cursor: 'pointer',
+                                            '&:hover .client-name': { 
+                                                textDecoration: 'underline',
+                                                color: 'primary.main'
+                                            }
+                                        }}
+                                    >
                                         <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
                                             {sessao.cliente.nome?.charAt(0).toUpperCase()}
                                         </Avatar>
                                         <Box>
-                                            <Typography variant="body2" fontWeight="bold">
+                                            <Typography 
+                                                className="client-name"
+                                                variant="body2" 
+                                                fontWeight="bold"
+                                                sx={{ transition: 'all 0.2s' }}
+                                            >
                                                 {sessao.cliente.nome}
                                             </Typography>
                                             <Typography variant="caption" color="text.secondary">

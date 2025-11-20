@@ -65,29 +65,60 @@ exports.getAllMaquinas = async (req, res) => {
 // • “máquinas com mais registros de defeitos / mais manutenções”
 // • Usado para identificar máquinas problemáticas e possíveis pontos de falha recorrente
 exports.getMostFixedMaquinas = async (req, res) => {
-    const { rows } = await db.query(
-        `SELECT COUNT(*) as vezesConsertada, m.id as maquinaId, p.nome as nomePlat, p.tipo as tipoPlat
-        FROM maquina m 
-        JOIN manutencaomaquina man ON m.id = man.idmaquina 
-        JOIN plataforma p ON m.nomeplat = p.nome
-        GROUP BY m.id, p.nome, p.tipo
-        ORDER BY vezesConsertada 
-        DESC LIMIT 10 
-        `
-    )
+    try {
+        const { rows } = await db.query(
+            `WITH manutencoes_recentes AS (
+                SELECT 
+                    m.id as maquinaId,
+                    p.nome as nomePlat,
+                    p.tipo as tipoPlat,
+                    ag.datatempoinicio as datahora,
+                    LAG(ag.datatempoinicio) OVER (PARTITION BY m.id ORDER BY ag.datatempoinicio) as manutencao_anterior 
+                FROM maquina m 
+                JOIN manutencaomaquina man ON m.id = man.idmaquina 
+                JOIN agendamento ag ON ag.id = man.idmanutencao 
+                JOIN plataforma p ON m.nomeplat = p.nome
+            ),
+            maquinas_problematicas AS (
+                SELECT 
+                    maquinaId,
+                    nomePlat,
+                    tipoPlat,
+                    COUNT(*) as vezesConsertada,
+                    MIN(datahora - manutencao_anterior) as menor_intervalo
+                FROM manutencoes_recentes
+                GROUP BY maquinaId, nomePlat, tipoPlat
+                HAVING COUNT(*) > 1
+            )
+            SELECT 
+                vezesConsertada,
+                maquinaId,
+                nomePlat,
+                tipoPlat,
+                EXTRACT(DAYS FROM menor_intervalo) as dias_menor_intervalo
+            FROM maquinas_problematicas
+            ORDER BY vezesConsertada DESC, menor_intervalo ASC
+            LIMIT 10`
+        );
 
-    res.status(200).send({
-        success: true,
-        message: "Maquinas consultadas com sucesso!",
-        data: rows.map((row) => {
-            return {
-                vezesConsertada: row.vezesConsertada,
-                id: row.maquinaId,
-                nomePlataforma: row.nomePlat,
-                tipoPlataforma: row.tipoPlat
-            }
-        })
-    })
+        res.status(200).send({
+            success: true,
+            message: "Maquinas consultadas com sucesso!",
+            data: rows.map((row) => ({
+                vezesConsertada: parseInt(row.vezesconsertada),
+                id: row.maquinaid,
+                nomePlataforma: row.nomeplat,
+                tipoPlataforma: row.tipoplat,
+                diasMenorIntervalo: row.dias_menor_intervalo ? Math.floor(row.dias_menor_intervalo) : null
+            }))
+        });
+    } catch (error) {
+        console.error("Erro ao buscar máquinas com problemas recorrentes:", error);
+        res.status(500).send({
+            success: false,
+            errors: ["Erro ao buscar máquinas problemáticas: " + error.message]
+        });
+    }
 }
 
 // Listar hardwares disponíveis no estoque (sem máquina)

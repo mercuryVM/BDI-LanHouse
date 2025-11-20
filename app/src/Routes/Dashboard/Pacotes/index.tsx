@@ -1,6 +1,7 @@
 import type { UserData, Pacote, Cliente, PacoteInfo } from "../../../API/APIClient";
 import type APIClient from "../../../API/APIClient";
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router";
 import {
     Table,
     TableBody,
@@ -47,10 +48,15 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 export function Pacotes({ client }: { client: APIClient, userData: UserData | null }) {
+    const navigate = useNavigate();
     const [pacotes, setPacotes] = useState<Pacote[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [tipoFilter, setTipoFilter] = useState<'vip' | 'ordinario' | null>(null);
+
+    const handleClienteClick = (cpf: string) => {
+        navigate(`/dashboard?tab=clientes&cpf=${cpf}`);
+    };
     
     // Modal states
     const [openModal, setOpenModal] = useState(false);
@@ -418,8 +424,22 @@ export function Pacotes({ client }: { client: APIClient, userData: UserData | nu
                                         hover
                                     >
                                         <TableCell>
-                                            <Box>
-                                                <Typography variant="body2" fontWeight="bold">
+                                            <Box
+                                                onClick={() => handleClienteClick(pacote.cpf)}
+                                                sx={{ 
+                                                    cursor: 'pointer',
+                                                    '&:hover .client-name': { 
+                                                        textDecoration: 'underline',
+                                                        color: 'primary.main'
+                                                    }
+                                                }}
+                                            >
+                                                <Typography 
+                                                    className="client-name"
+                                                    variant="body2" 
+                                                    fontWeight="bold"
+                                                    sx={{ transition: 'all 0.2s' }}
+                                                >
                                                     {pacote.clinome}
                                                 </Typography>
                                                 <Typography variant="caption" color="text.secondary">
