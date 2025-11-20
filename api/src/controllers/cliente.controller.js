@@ -219,3 +219,105 @@ exports.verificarClienteNovo = async (req, res) => {
         return;
     }
 }
+
+// Consultas por: 
+// total de horas, 
+// número de sessões, 
+// frequência de visitas, 
+// última visita, 
+// clientes que não aparecem há mais que X meses
+exports.listarClientesFiltro = async (req, res) => {
+    const totalHoras = req.body.totalHoras;
+    const numSessoes = req.body.numSessoes;
+    const frequenciaVisitas = req.body.frequenciaVisitas;
+    const ultimaVisita = req.body.ultimaVisita;
+    const clientesInativos = req.body.clientesInativos;
+    const deltaMeses = req.body.deltaMeses;
+
+    let flagParamValidos = false;
+    let query = "";
+
+    if(totalHoras){
+        query = "SELECT c.cpf, c.nome, c.vip, " +
+                "ROUND(SUM(EXTRACT(EPOCH FROM (s.datatempofim - s.datatempoinicio))) / 3600, 1) AS horasTotal " +
+                "FROM cliente c " +
+                "JOIN sessao s ON c.cpf = s.cliente " +
+                "WHERE s.datatempofim IS NOT NULL " +
+                "GROUP BY c.cpf, c.nome, c.vip " +
+                "ORDER BY horasTotal DESC;";
+        
+        flagParamValidos = true;
+    }
+    if(numSessoes){
+        query = "SELECT c.nome, c.cpf, c.vip, " +
+                "COUNT(datatempoinicio) as quantidadeSessoes " +
+                "FROM cliente c " +
+                "JOIN sessao s ON (c.cpf = s.cliente) " +
+                "GROUP BY c.nome, c.cpf, c.vip " +
+                "ORDER BY quantidadeSessoes DESC;";
+        
+        flagParamValidos = true;
+    }
+    if(frequenciaVisitas){ // nao entra na divisão os meses em que o cliente não teve nenhuma sessão
+        query = "SELECT c.cpf, c.nome, c.vip, ROUND(AVG(sessoes_no_mes), 1) AS media_sessoes_por_mes " +
+                "FROM ( " +
+                    "SELECT s.cliente, " +
+                        "DATE_TRUNC('month', s.dataTempoInicio) AS mes, " +
+                        "COUNT(*) AS sessoes_no_mes " +
+                    "FROM sessao s " +
+                    "GROUP BY s.cliente, mes " +
+                ") as s JOIN cliente c ON c.cpf = s.cliente " +
+                "GROUP BY c.cpf, c.nome, c.vip " +
+                "ORDER BY media_sessoes_por_mes DESC; "; 
+        
+        flagParamValidos = true;
+    }
+    if(ultimaVisita){
+        query = "SELECT DISTINCT ON (cliente) c.cpf, c.nome, c.vip, " +
+                    "dataTempoInicio, " +
+                    "ROUND(EXTRACT(EPOCH FROM (s.datatempofim - s.datatempoinicio)) / 3600, 1) as duracao " +
+                "FROM sessao s JOIN cliente c ON (c.cpf = s.cliente) " +
+                "WHERE datatempofim IS NOT NULL " +
+                "ORDER BY cliente, dataTempoInicio DESC;";
+        
+        flagParamValidos = true;
+    }
+    if(clientesInativos && deltaMeses){
+        query = "SELECT c.cpf, c.nome, c.vip, MAX(s.dataTempoInicio) AS ultima_sessao " +
+                "FROM cliente c " +
+                "LEFT JOIN sessao s ON s.cliente = c.cpf " +
+                "GROUP BY c.cpf, c.nome, c.vip " +
+                `HAVING MAX(s.dataTempoInicio) < NOW() - INTERVAL '${deltaMeses} months' ` +
+                "OR MAX(s.dataTempoInicio) IS NULL;";
+        // interval nao aceita parametro, entao fiz dessa forma => sujeito a sql injection
+
+        flagParamValidos = true;
+    }
+
+    if(flagParamValidos){
+        const {rows} = await db.query(query, []);
+
+        if(rows.length){
+            res.status(200).send({
+                success: true,
+                data: rows,
+                message: "Clientes encontrados"
+            });
+            return;
+        }
+        else{
+            res.status(404).send({
+                success: false,
+                message: "Nenhum cliente encontrado"
+            });
+            return;
+        }
+    }
+    else{
+        res.status(400).send({
+            success: false,
+            message: "Parâmetros de filtro inválidos"
+        });
+        return;
+    }
+}
