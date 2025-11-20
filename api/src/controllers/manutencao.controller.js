@@ -19,7 +19,13 @@ exports.getManutencoes = async (req, res) => {
             a.datatempoinicio AS manutencaodatatempoinicio,
             a.datatempofim AS manutencaodatatempofim,
             f.nome as nomeFuncionario,
-            f.cpf as cpfFuncionario
+            f.cpf as cpfFuncionario,
+            CASE m.prioridade 
+                WHEN 'Alta' THEN 1 
+                WHEN 'Média' THEN 2 
+                WHEN 'Baixa' THEN 3 
+                ELSE 4 
+            END as prioridadeOrdem
         FROM manutencao m 
         LEFT JOIN agendamento a ON m.id = a.id 
         JOIN funcionario f ON a.agendadopor = f.cpf
@@ -48,14 +54,7 @@ exports.getManutencoes = async (req, res) => {
     }
 
     // Ordenar por prioridade (Alta > Média > Baixa) e depois por data
-    query += ` ORDER BY 
-        CASE m.prioridade 
-            WHEN 'Alta' THEN 1 
-            WHEN 'Média' THEN 2 
-            WHEN 'Baixa' THEN 3 
-            ELSE 4 
-        END,
-        a.datatempoinicio DESC NULLS LAST`;
+    query += ` ORDER BY prioridadeOrdem, manutencaodatatempoinicio DESC NULLS LAST`;
 
     const { rows } = await db.query(query, params);
 

@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import type { Maquina, UserData, Sessao } from "../../../API/APIClient";
+import type { Maquina, UserData, Sessao, Hardware } from "../../../API/APIClient";
 import type APIClient from "../../../API/APIClient";
 import {
     Table,
@@ -26,7 +26,19 @@ import {
     Tabs,
     Tab,
     Grid,
-    Tooltip
+    Tooltip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    List,
+    ListItem,
+    ListItemText,
+    ListItemSecondaryAction,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel
 } from "@mui/material";
 import { 
     Computer, 
@@ -40,7 +52,10 @@ import {
     Info,
     History,
     ViewList,
-    ViewModule
+    ViewModule,
+    Memory,
+    Add,
+    Delete
 } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -54,6 +69,11 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
     const [sessoes, setSessoes] = useState<Sessao[]>([]);
     const [loadingSessoes, setLoadingSessoes] = useState(false);
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+    const [hardwares, setHardwares] = useState<Hardware[]>([]);
+    const [loadingHardwares, setLoadingHardwares] = useState(false);
+    const [addHardwareDialogOpen, setAddHardwareDialogOpen] = useState(false);
+    const [hardwaresDisponiveis, setHardwaresDisponiveis] = useState<Hardware[]>([]);
+    const [selectedHardwareId, setSelectedHardwareId] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchMaquinas = async () => {
@@ -84,6 +104,69 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                 .finally(() => setLoadingSessoes(false));
         }
     }, [selectedMaquina, tabValue, client]);
+
+    useEffect(() => {
+        if (selectedMaquina && tabValue === 2) {
+            setLoadingHardwares(true);
+            client.getHardwaresByMaquina(selectedMaquina.id)
+                .then(data => setHardwares(data))
+                .catch(error => {
+                    console.error('Erro ao carregar hardwares:', error);
+                    setHardwares([]);
+                })
+                .finally(() => setLoadingHardwares(false));
+        }
+    }, [selectedMaquina, tabValue, client]);
+
+    const loadHardwaresDisponiveis = async () => {
+        try {
+            const data = await client.getHardwaresDisponiveis();
+            setHardwaresDisponiveis(data);
+        } catch (error) {
+            console.error('Erro ao carregar hardwares disponíveis:', error);
+        }
+    };
+
+    const handleAddHardware = async () => {
+        if (!selectedMaquina || !selectedHardwareId) return;
+
+        try {
+            await client.addHardwareToMaquina({
+                maquinaId: selectedMaquina.id,
+                hardwareId: selectedHardwareId
+            });
+            
+            // Recarregar hardwares
+            const data = await client.getHardwaresByMaquina(selectedMaquina.id);
+            setHardwares(data);
+            
+            // Resetar e fechar dialog
+            setSelectedHardwareId(null);
+            setAddHardwareDialogOpen(false);
+            
+            // Recarregar hardwares disponíveis
+            loadHardwaresDisponiveis();
+        } catch (error) {
+            console.error('Erro ao adicionar hardware:', error);
+        }
+    };
+
+    const handleRemoveHardware = async (hardwareId: number) => {
+        if (!selectedMaquina) return;
+
+        try {
+            await client.removeHardwareFromMaquina(hardwareId);
+            
+            // Recarregar hardwares
+            const data = await client.getHardwaresByMaquina(selectedMaquina.id);
+            setHardwares(data);
+            
+            // Recarregar hardwares disponíveis
+            loadHardwaresDisponiveis();
+        } catch (error) {
+            console.error('Erro ao remover hardware:', error);
+        }
+    };
 
     const isActive = (lastseen?: Date) => {
         if (!lastseen) return false;
@@ -588,6 +671,7 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                     setSelectedMaquina(null);
                     setTabValue(0);
                     setSessoes([]);
+                    setHardwares([]);
                 }}
                 PaperProps={{
                     sx: { 
@@ -633,6 +717,7 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                     setSelectedMaquina(null);
                                     setTabValue(0);
                                     setSessoes([]);
+                                    setHardwares([]);
                                 }}>
                                     <Close />
                                 </IconButton>
@@ -652,6 +737,7 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                             >
                                 <Tab icon={<Info />} iconPosition="start" label="Detalhes" />
                                 <Tab icon={<History />} iconPosition="start" label="Sessões" />
+                                <Tab icon={<Memory />} iconPosition="start" label="Hardwares" />
                             </Tabs>
                         </motion.div>
 
@@ -821,10 +907,162 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                     )}
                                 </motion.div>
                             )}
+
+                            {tabValue === 2 && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    {loadingHardwares ? (
+                                        <Box display="flex" justifyContent="center" alignItems="center" py={8}>
+                                            <CircularProgress />
+                                        </Box>
+                                    ) : (
+                                        <>
+                                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                                                <Typography variant="h6">
+                                                    Hardwares Anexados
+                                                </Typography>
+                                                <Button
+                                                    variant="contained"
+                                                    startIcon={<Add />}
+                                                    onClick={() => setAddHardwareDialogOpen(true)}
+                                                    size="small"
+                                                >
+                                                    Adicionar Hardware
+                                                </Button>
+                                            </Box>
+
+                                            {hardwares.length === 0 ? (
+                                                <Box textAlign="center" py={8}>
+                                                    <Typography variant="h6" color="text.secondary">
+                                                        Nenhum hardware anexado
+                                                    </Typography>
+                                                </Box>
+                                            ) : (
+                                                <List>
+                                                    {hardwares.map((hardware, index) => (
+                                                        <motion.div
+                                                            key={hardware.hardwareid}
+                                                            initial={{ opacity: 0, x: -10 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            transition={{ delay: index * 0.05, duration: 0.2 }}
+                                                        >
+                                                            <ListItem
+                                                                component={Paper}
+                                                                sx={{ mb: 1, borderRadius: 1 }}
+                                                            >
+                                                                <ListItemText
+                                                                    primary={
+                                                                        <Box display="flex" alignItems="center" gap={1}>
+                                                                            <Memory color="primary" />
+                                                                            <Typography variant="body1" fontWeight="bold">
+                                                                                {hardware.hardwarenome}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    }
+                                                                    secondary={
+                                                                        <Box display="flex" gap={1} mt={0.5}>
+                                                                            <Chip 
+                                                                                label={hardware.hardwaretipo} 
+                                                                                size="small" 
+                                                                                variant="outlined"
+                                                                            />
+                                                                            <Chip 
+                                                                                label={hardware.hardwareestado} 
+                                                                                size="small" 
+                                                                                color={hardware.hardwareestado === 'ativo' ? 'success' : 'default'}
+                                                                            />
+                                                                        </Box>
+                                                                    }
+                                                                />
+                                                                <ListItemSecondaryAction>
+                                                                    <IconButton
+                                                                        edge="end"
+                                                                        onClick={() => handleRemoveHardware(hardware.hardwareid!)}
+                                                                        color="error"
+                                                                    >
+                                                                        <Delete />
+                                                                    </IconButton>
+                                                                </ListItemSecondaryAction>
+                                                            </ListItem>
+                                                        </motion.div>
+                                                    ))}
+                                                </List>
+                                            )}
+                                        </>
+                                    )}
+                                </motion.div>
+                            )}
                         </Box>
                     </Box>
                 )}
             </Drawer>
+
+            {/* Dialog para Adicionar Hardware */}
+            <Dialog 
+                open={addHardwareDialogOpen} 
+                onClose={() => {
+                    setAddHardwareDialogOpen(false);
+                    setSelectedHardwareId(null);
+                }}
+                onTransitionEnter={loadHardwaresDisponiveis}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Adicionar Hardware do Estoque</DialogTitle>
+                <DialogContent>
+                    <Box display="flex" flexDirection="column" gap={2} mt={2}>
+                        {hardwaresDisponiveis.length === 0 ? (
+                            <Typography variant="body2" color="text.secondary" textAlign="center" py={4}>
+                                Nenhum hardware disponível no estoque
+                            </Typography>
+                        ) : (
+                            <FormControl fullWidth required>
+                                <InputLabel>Selecione um Hardware</InputLabel>
+                                <Select
+                                    value={selectedHardwareId || ''}
+                                    label="Selecione um Hardware"
+                                    onChange={(e) => setSelectedHardwareId(Number(e.target.value))}
+                                >
+                                    {hardwaresDisponiveis.map((hw) => (
+                                        <MenuItem key={hw.hardwareid} value={hw.hardwareid}>
+                                            <Box display="flex" alignItems="center" gap={1} width="100%">
+                                                <Memory fontSize="small" />
+                                                <Typography flex={1}>
+                                                    {hw.hardwarenome}
+                                                </Typography>
+                                                <Chip label={hw.hardwaretipo} size="small" variant="outlined" />
+                                                <Chip 
+                                                    label={hw.hardwareestado} 
+                                                    size="small" 
+                                                    color={hw.hardwareestado === 'ativo' ? 'success' : 'default'}
+                                                />
+                                            </Box>
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        )}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {
+                        setAddHardwareDialogOpen(false);
+                        setSelectedHardwareId(null);
+                    }}>
+                        Cancelar
+                    </Button>
+                    <Button 
+                        onClick={handleAddHardware}
+                        variant="contained"
+                        disabled={!selectedHardwareId}
+                    >
+                        Adicionar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

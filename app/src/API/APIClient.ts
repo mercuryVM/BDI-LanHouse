@@ -320,6 +320,36 @@ export default class APIClient {
         }
     }
 
+    async getHardwaresDisponiveis(): Promise<Hardware[]> {
+        try {
+            const hardwares = await this.get<Hardware[]>('/getHardwaresDisponiveis');
+            return hardwares;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async addHardwareToMaquina(data: {
+        maquinaId: number;
+        hardwareId: number;
+    }): Promise<ApiResponse<Hardware>> {
+        try {
+            const response = await this.postRaw('/addHardwareToMaquina', data);
+            return response;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async removeHardwareFromMaquina(hardwareId: number): Promise<ApiResponse> {
+        try {
+            const response = await this.postRaw('/removeHardwareFromMaquina', { hardwareId });
+            return response;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     async getAllClientePacotes(): Promise<Pacote[]> {
         try {
             const pacotes = await this.get<Pacote[]>('/getAllClientePacotes');

@@ -6,5 +6,8 @@ router.get('/getMostUsedMaquinas', authMiddleware, authRequireType(['funcionario
 router.get('/getMostFixedMaquinas', authMiddleware, authRequireType(['funcionario']), maquinaController.getMostFixedMaquinas);
 router.post('/pingMaquina', maquinaController.pingMaquina);
 router.get('/getAllMaquinas', authMiddleware, maquinaController.getAllMaquinas);
+router.get('/getHardwaresDisponiveis', authMiddleware, maquinaController.getHardwaresDisponiveis);
+router.post('/addHardwareToMaquina', authMiddleware, authRequireType(['funcionario']), maquinaController.addHardwareToMaquina);
+router.post('/removeHardwareFromMaquina', authMiddleware, authRequireType(['funcionario']), maquinaController.removeHardwareFromMaquina);
 
 module.exports = router;
