@@ -341,6 +341,107 @@ export default class APIClient {
         }
     }
 
+    async getAllComandas(): Promise<{
+        id: number;
+        data: string;
+        cpffuncionario: string;
+        nomefuncionario: string;
+        cpfcliente: string;
+        nomecliente: string;
+        total: string;
+        fechada?: boolean;
+    }[]> {
+        try {
+            const result = await this.get<{
+                id: number;
+                data: string;
+                cpffuncionario: string;
+                nomefuncionario: string;
+                cpfcliente: string;
+                nomecliente: string;
+                total: string;
+                fechada?: boolean;
+            }[]>('/getAllComandas');
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getProdutosDaComanda(comandaId: number): Promise<{
+        id: number;
+        nome: string;
+        preco: string;
+        quantidade: string;
+        subtotal: string;
+    }[]> {
+        try {
+            const result = await this.get<{
+                id: number;
+                nome: string;
+                preco: string;
+                quantidade: string;
+                subtotal: string;
+            }[]>(`/getProdutosDaComanda?comandaId=${comandaId}`);
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async abrirComandaDoCliente(cliente: string, funcionario: string): Promise<{ id: number }[]> {
+        try {
+            const result = await this.post<{ id: number }[]>('/abrirComandaDoCliente', {
+                cliente,
+                funcionario
+            });
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async adicionarProdutoNaComanda(comanda: number, produto: number, quantidade: number): Promise<void> {
+        try {
+            await this.post('/adicionarProdutoNaComanda', {
+                comanda,
+                produto,
+                quantidade
+            });
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async fecharComandaDoCliente(comanda: number): Promise<void> {
+        try {
+            await this.put('/fecharComandaDoCliente', {
+                comanda
+            });
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getProdutos(): Promise<{
+        produtoid: number;
+        produtonome: string;
+        precoproduto: string;
+        precoestoque: number;
+    }[]> {
+        try {
+            const result = await this.get<{
+                produtoid: number;
+                produtonome: string;
+                precoproduto: string;
+                precoestoque: number;
+            }[]>('/getProdutos');
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     async getHardwaresDisponiveis(): Promise<Hardware[]> {
         try {
             const hardwares = await this.get<Hardware[]>('/getHardwaresDisponiveis');

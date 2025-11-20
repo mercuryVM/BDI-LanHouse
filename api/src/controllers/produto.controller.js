@@ -1,4 +1,4 @@
-
+const db = require("../config/database");
 // RF16 – Consultar produtos com filtros
 // • Filtros: faixa de preço, nome, poucas unidades (flag <10)
 // Requisitos de Dados – produto possui: id, nome, preço, quantidade em estoque
@@ -47,14 +47,7 @@ exports.getProdutos = async (req, res) => {
     res.status(200).send({
         success: true,
         message: "Produtos consultados com sucesso!",
-        data: rows.map((row) => {
-            return {
-                produtoId: row.produtoId,
-                produtoNome: row.produtoNome,
-                precoProduto: row.precoProduto,
-                precoEstoque: row.precoEstoque
-            }
-        })
+        data: rows
 
     });
 };

@@ -4,7 +4,7 @@ const db = require("../config/database");
 // (Mostra comandas com cliente, funcionário emissor e total consumido)
 exports.getAllComandas = async(req, res) => {
     const linhaQuery = 
-    "SELECT co.id, co.data, co.emissao as cpfFuncionario, f.nome AS nomeFuncionario, cl.cpf as cpfcliente, cl.nome AS nomecliente," +
+    "SELECT co.id, co.data, co.fechada, co.emissao as cpfFuncionario, f.nome AS nomeFuncionario, cl.cpf as cpfcliente, cl.nome AS nomecliente," +
     "    (" +
     "        SELECT COALESCE(SUM(cp.quantidade * p.preco), 0) " +
     "        FROM comandaProduto cp " +
@@ -14,7 +14,8 @@ exports.getAllComandas = async(req, res) => {
     "FROM comanda co " +
     "    JOIN cliente cl ON (cl.cpf = co.cliente) " +
     "    JOIN clt ON (clt.cpf = co.emissao) " +
-    "    JOIN funcionario f ON (f.cpf = clt.cpf) ";
+    "    JOIN funcionario f ON (f.cpf = clt.cpf) " +
+    "ORDER BY co.fechada ASC, co.data DESC, co.id DESC";
         
     const {rows} =  await db.query(linhaQuery);
     
@@ -169,5 +170,34 @@ exports.fecharComandaDoCliente = async(req, res) => {
     res.status(200).send({
         success: true,
         message: "Comanda fechada",
+    });
+}
+
+// Buscar produtos de uma comanda específica
+exports.getProdutosDaComanda = async(req, res) => {
+    const comandaId = req.query.comandaId;
+    
+    if(!comandaId){
+        res.status(400).send({
+            success: false,
+            message: "ID da comanda não fornecido",
+        });
+        return;
+    }
+
+    const linhaQuery = 
+        "SELECT p.id, p.nome, p.preco, cp.quantidade, " +
+        "(cp.quantidade * p.preco) AS subtotal " +
+        "FROM comandaProduto cp " +
+        "JOIN produto p ON cp.produto = p.id " +
+        "WHERE cp.comanda = $1 " +
+        "ORDER BY p.nome";
+
+    const {rows} = await db.query(linhaQuery, [comandaId]);
+
+    res.status(200).send({
+        success: true,
+        message: "Produtos da comanda carregados com sucesso",
+        data: rows
     });
 }

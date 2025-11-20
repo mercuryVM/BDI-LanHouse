@@ -4,6 +4,7 @@ const {authMiddleware, authRequireType} = require('../middlewares/auth.middlewar
 
 router.get('/getAllComandas', comandaController.getAllComandas);
 router.get('/getComanda', comandaController.getComanda);
+router.get('/getProdutosDaComanda', comandaController.getProdutosDaComanda);
 router.post('/abrirComandaDoCliente', comandaController.abrirComandaDoCliente);
 router.post('/adicionarProdutoNaComanda', comandaController.adicionarProdutoNaComanda);
 router.put('/fecharComandaDoCliente', comandaController.fecharComandaDoCliente)

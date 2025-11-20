@@ -5,6 +5,7 @@ import UserIcon from "@mui/icons-material/Group";
 import SessionIcon from "@mui/icons-material/Computer";
 import MaquinasIcon from "@mui/icons-material/ComputerTwoTone";
 import ComprasIcon from "@mui/icons-material/ShoppingCart";
+import ReceiptIcon from "@mui/icons-material/Receipt";
 import React, { useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import { Home } from "./Home";
@@ -17,6 +18,7 @@ import { Maquinas } from "./Maquinas";
 import { Pacotes } from "./Pacotes";
 import { Manutencao } from "./Manutencao";
 import { Hardware } from "./Hardware";
+import { Comandas } from "./Comandas";
 
 
 const tabs = [
@@ -53,6 +55,12 @@ const tabs = [
         icon: <ComprasIcon />,
         permission: 'clt',
         renderer: Pacotes
+    },
+    {
+        label: "Comandas",
+        icon: <ReceiptIcon />,
+        permission: 'clt',
+        renderer: Comandas
     }, 
     {
         label: "Manutenções",
