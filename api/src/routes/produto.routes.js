@@ -3,6 +3,6 @@ const produtoController = require('../controllers/produto.controller');
 const {authMiddleware, authRequireType} = require('../middlewares/auth.middleware');
 
 router.get('/getProdutos', authMiddleware, authRequireType(['funcionario']), produtoController.getProdutos);
-router.get('/produto', authMiddleware, authRequireType(['funcionario']), produtoController.getproduto);
+router.get('/produto', authMiddleware, authRequireType(['funcionario']), produtoController.getProduto);
 
 module.exports = router;
