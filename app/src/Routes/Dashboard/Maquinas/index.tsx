@@ -533,8 +533,9 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                     const lastSeen = formatLastSeen(new Date(maquina.lastseen));
                                     
                                     return (
-                                        <Grid item xs={12} sm={6} md={4} lg={3} key={maquina.id}>
+                                        <Grid item width={"calc(20% - 16px)"} xs={12} sm={6} md={4} lg={3} key={maquina.id} sx={{ display: 'flex' }}>
                                             <motion.div
+                                                style={{ width: '100%', display: 'flex' }}
                                                 initial={{ opacity: 0, scale: 0.9 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 transition={{ delay: index * 0.05, duration: 0.3 }}
@@ -544,7 +545,10 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                                 <Card 
                                                     sx={{ 
                                                         cursor: 'pointer',
-                                                        height: '100%',
+                                                        width: '100%',
+                                                        minHeight: 280,
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
                                                         position: 'relative',
                                                         overflow: 'visible',
                                                         border: active ? 2 : 1,
@@ -579,48 +583,51 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                                         </Avatar>
                                                     </Box>
 
-                                                    <CardContent sx={{ textAlign: 'center', pb: 2 }}>
-                                                        {/* Ícone Principal */}
-                                                        <Avatar
-                                                            sx={{
-                                                                width: 64,
-                                                                height: 64,
-                                                                margin: '0 auto 16px',
-                                                                bgcolor: active ? 'success.light' : 'grey.300',
-                                                                color: active ? 'success.dark' : 'grey.600'
-                                                            }}
-                                                        >
-                                                            {getTipoIcon(maquina.tipo)}
-                                                        </Avatar>
+                                                    <CardContent sx={{ textAlign: 'center', py: 3, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                                        <Box>
+                                                            {/* Ícone Principal */}
+                                                            <Avatar
+                                                                sx={{
+                                                                    width: 64,
+                                                                    height: 64,
+                                                                    margin: '0 auto 16px',
+                                                                    bgcolor: active ? 'success.light' : 'grey.300',
+                                                                    color: active ? 'success.dark' : 'grey.600'
+                                                                }}
+                                                            >
+                                                                {getTipoIcon(maquina.tipo)}
+                                                            </Avatar>
 
-                                                        {/* ID */}
-                                                        <Typography variant="h5" fontWeight="bold" gutterBottom>
-                                                            #{maquina.id}
-                                                        </Typography>
+                                                            {/* ID */}
+                                                            <Typography variant="h5" fontWeight="bold" gutterBottom>
+                                                                #{maquina.id}
+                                                            </Typography>
 
-                                                        {/* Nome da Plataforma */}
-                                                        <Typography 
-                                                            variant="body1" 
-                                                            color="text.secondary"
-                                                            gutterBottom
-                                                            sx={{
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                whiteSpace: 'nowrap'
-                                                            }}
-                                                        >
-                                                            {maquina.nomeplat}
-                                                        </Typography>
+                                                            {/* Nome da Plataforma */}
+                                                            <Typography 
+                                                                variant="body1" 
+                                                                color="text.secondary"
+                                                                gutterBottom
+                                                                sx={{
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    minHeight: '24px'
+                                                                }}
+                                                            >
+                                                                {maquina.nomeplat}
+                                                            </Typography>
 
-                                                        {/* Tipo */}
-                                                        <Box mt={2} mb={2}>
-                                                            <Chip
-                                                                icon={getTipoIcon(maquina.tipo)}
-                                                                label={getTipoLabel(maquina.tipo)}
-                                                                size="small"
-                                                                variant="outlined"
-                                                                color="primary"
-                                                            />
+                                                            {/* Tipo */}
+                                                            <Box mt={2} mb={2}>
+                                                                <Chip
+                                                                    icon={getTipoIcon(maquina.tipo)}
+                                                                    label={getTipoLabel(maquina.tipo)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                />
+                                                            </Box>
                                                         </Box>
 
                                                         {/* Status e Última Conexão */}
@@ -949,21 +956,16 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                                             animate={{ opacity: 1, x: 0 }}
                                                             transition={{ delay: index * 0.05, duration: 0.2 }}
                                                         >
-                                                            <ListItem
-                                                                component={Paper}
-                                                                sx={{ mb: 1, borderRadius: 1 }}
-                                                            >
-                                                                <ListItemText
-                                                                    primary={
-                                                                        <Box display="flex" alignItems="center" gap={1}>
+                                                            <Paper sx={{ mb: 1, borderRadius: 1, p: 2 }}>
+                                                                <Box display="flex" alignItems="center" justifyContent="space-between">
+                                                                    <Box flex={1}>
+                                                                        <Box display="flex" alignItems="center" gap={1} mb={1}>
                                                                             <Memory color="primary" />
                                                                             <Typography variant="body1" fontWeight="bold">
                                                                                 {hardware.hardwarenome}
                                                                             </Typography>
                                                                         </Box>
-                                                                    }
-                                                                    secondary={
-                                                                        <Box display="flex" gap={1} mt={0.5}>
+                                                                        <Box display="flex" gap={1}>
                                                                             <Chip 
                                                                                 label={hardware.hardwaretipo} 
                                                                                 size="small" 
@@ -975,18 +977,15 @@ export function Maquinas({ client }: { client: APIClient, userData: UserData | n
                                                                                 color={hardware.hardwareestado === 'ativo' ? 'success' : 'default'}
                                                                             />
                                                                         </Box>
-                                                                    }
-                                                                />
-                                                                <ListItemSecondaryAction>
+                                                                    </Box>
                                                                     <IconButton
-                                                                        edge="end"
                                                                         onClick={() => handleRemoveHardware(hardware.hardwareid!)}
                                                                         color="error"
                                                                     >
                                                                         <Delete />
                                                                     </IconButton>
-                                                                </ListItemSecondaryAction>
-                                                            </ListItem>
+                                                                </Box>
+                                                            </Paper>
                                                         </motion.div>
                                                     ))}
                                                 </List>
