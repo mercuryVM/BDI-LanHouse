@@ -6,6 +6,8 @@ import type APIClient from "../../API/APIClient";
 import { useMaquinaId } from "../../Hooks/useMaquinaId";
 import { Computer, Lock, Person, Visibility, VisibilityOff, SportsEsports, AdminPanelSettings, Gamepad } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAppDispatch } from "../../Hooks/reduxHooks";
+import { clearError } from "../../store/slices/userDataSlice";
 
 export default function Home({ client }: { client: APIClient }) {
     const [error, setError] = useState<string | null>(null);
@@ -15,6 +17,7 @@ export default function Home({ client }: { client: APIClient }) {
     const [showPassword, setShowPassword] = useState<boolean>(false);
 
     const maquinaId = useMaquinaId();
+    const dispatch = useAppDispatch();
 
     const navigate: NavigateFunction = useNavigate();
 
@@ -32,6 +35,8 @@ export default function Home({ client }: { client: APIClient }) {
             let response = await client.login(username, password, 1);
 
             if (response) {
+                // Limpa o erro do Redux que foi setado no logout
+                dispatch(clearError());
                 navigate("/dashboard");
             }
         } catch (e) {
@@ -39,7 +44,7 @@ export default function Home({ client }: { client: APIClient }) {
         } finally {
             setLoading(false);
         }
-    }, [username, password]);
+    }, [username, password, dispatch, navigate, client]);
 
     return (
         <div className={styles.container}>

@@ -99,10 +99,32 @@ export interface Manutencao {
     manutencaotipo: string;
     manutencaoprioridade: string;
     manutencaodatatempoinicio: Date;
-    maquinaid: number;
-    nomeplat: string;
-    tipoplat: number;
+    manutencaodatatempofim?: Date | null;
     nomefuncionario: string;
+    cpffuncionario: string;
+    maquinas: {
+        maquinaid: number;
+        nomeplat: string;
+        tipoplat: number;
+    }[];
+    hardwares: {
+        hardwareid: number;
+        hardwarenome: string;
+        hardwareestado: string;
+        hardwaretipo: string;
+        motivo?: string | null;
+    }[];
+}
+
+export interface Hardware {
+    hardwareid: number;
+    hardwarenome: string;
+    hardwareestado: string;
+    hardwaretipo: string;
+    maquinaid?: number;
+    nomeplat?: string;
+    tipoPlat?: number;
+    motivo?: string | null;
 }
 
 export default class APIClient {
@@ -334,10 +356,49 @@ export default class APIClient {
         }
     }
 
-    async getManutencao(id: number): Promise<Manutencao> {
+    async createManutencao(data: {
+        tipo: string;
+        prioridade: string;
+        datatempoinicio: string;
+        datatempofim?: string;
+        maquinaId: number;
+        agendadoPor: string;
+        hardwareIds?: number[];
+        hardwares?: { hardwareId: number; motivo: string }[];
+    }): Promise<{ id: number }> {
         try {
-            const manutencao = await this.get<Manutencao>('/getManutencao', { id });
-            return manutencao;
+            const result = await this.post<{ id: number }>('/manutencao', data);
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async updateManutencao(id: number, data: {
+        tipo?: string;
+        prioridade?: string;
+        datatempoinicio?: string;
+        datatempofim?: string;
+    }): Promise<void> {
+        try {
+            await this.put<void>(`/manutencao?id=${id}`, data);
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async deleteManutencao(id: number): Promise<void> {
+        try {
+            await this.delete<void>(`/manutencao?id=${id}`);
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getHardwaresByMaquina(maquinaId: number): Promise<Hardware[]> {
+        try {
+            const hardwares = await this.get<Hardware[]>('/getHardwaresByMaquina', { maquinaId });
+            return hardwares;
         } catch (error) {
             throw this.handleError(error);
         }

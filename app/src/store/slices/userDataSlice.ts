@@ -88,8 +88,9 @@ const userDataSlice = createSlice({
         // Limpar dados do usuário
         clearUserData: (state) => {
             state.userData = null;
-            state.error = null;
+            state.error = 'User logged out';
             state.isTimerRunning = false;
+            state.isLoading = false;
         },
 
         // Atualizar dados específicos do usuário

@@ -40,9 +40,9 @@ export function useUserDataRedux(client: APIClient, enableTimer: boolean = false
             
             // Redirect to login
             console.log('Redirecting to login...');
-             navigate('/', { replace: true });
+            navigate('/', { replace: true });
         }
-    }, [error, isLoading, userData, navigate, dispatch, client]);
+    }, [error, isLoading, navigate, client]);
 
     // Start/stop timer based on enableTimer prop
     useEffect(() => {
