@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
 import type { UserData, Cliente } from "../../../API/APIClient";
 import type APIClient from "../../../API/APIClient";
 import {
@@ -40,6 +41,7 @@ import { InputAdornment, ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function Clientes({ client }: { client: APIClient, userData: UserData | null }) {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
@@ -69,6 +71,21 @@ export function Clientes({ client }: { client: APIClient, userData: UserData | n
             try {
                 const data = await client.getAllClientes();
                 setClientes(data);
+                
+                // Verifica se há um CPF na URL para abrir automaticamente
+                const cpfParam = searchParams.get('cpf');
+                if (cpfParam) {
+                    const clienteToOpen = data.find(c => c.cpf === cpfParam);
+                    if (clienteToOpen) {
+                        setSelectedCliente(clienteToOpen);
+                        setEditedCliente({});
+                        setHasChanges(false);
+                    }
+                    // Remove apenas o cpf, mantém a tab
+                    const newParams = new URLSearchParams(searchParams);
+                    newParams.delete('cpf');
+                    setSearchParams(newParams);
+                }
             } catch (error) {
                 console.error("Erro ao carregar clientes:", error);
             } finally {

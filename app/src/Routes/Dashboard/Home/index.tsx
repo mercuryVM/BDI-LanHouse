@@ -138,6 +138,7 @@ function ClienteStats({ client }: { client: APIClient }) {
     const [stats, setStats] = React.useState<any[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [filtroAtivo, setFiltroAtivo] = React.useState<string>('totalHoras');
+    const navigate = useNavigate();
 
     const filtros = [
         { key: 'totalHoras', label: 'Top Horas', icon: TrendingUp, color: '#1976d2' },
@@ -193,6 +194,10 @@ function ClienteStats({ client }: { client: APIClient }) {
     };
 
     const filtroSelecionado = filtros.find(f => f.key === filtroAtivo);
+
+    const handleClienteClick = (cpf: string) => {
+        navigate(`/dashboard?tab=clientes&cpf=${cpf}`);
+    };
 
     return (
         <Box sx={{ mt: 4, }}>
@@ -323,9 +328,24 @@ function ClienteStats({ client }: { client: APIClient }) {
                                             </Box>
 
                                             {/* Info do Cliente */}
-                                            <Box flex={1}>
+                                            <Box 
+                                                flex={1}
+                                                onClick={() => handleClienteClick(item.cpf)}
+                                                sx={{ 
+                                                    cursor: 'pointer',
+                                                    '&:hover .client-name': { 
+                                                        textDecoration: 'underline',
+                                                        color: 'primary.main'
+                                                    }
+                                                }}
+                                            >
                                                 <Box display="flex" alignItems="center" gap={1}>
-                                                    <Typography variant="body1" fontWeight={isTop3 ? 600 : 500}>
+                                                    <Typography 
+                                                        className="client-name"
+                                                        variant="body1" 
+                                                        fontWeight={isTop3 ? 600 : 500}
+                                                        sx={{ transition: 'all 0.2s' }}
+                                                    >
                                                         {item.nome}
                                                     </Typography>
                                                     {item.vip && (

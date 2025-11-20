@@ -5,7 +5,8 @@ import UserIcon from "@mui/icons-material/Group";
 import SessionIcon from "@mui/icons-material/Computer";
 import MaquinasIcon from "@mui/icons-material/ComputerTwoTone";
 import ComprasIcon from "@mui/icons-material/ShoppingCart";
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router";
 import { Home } from "./Home";
 import type APIClient from "../../API/APIClient";
 import { useUserDataRedux } from "../../hooks/useUserDataRedux";
@@ -68,6 +69,7 @@ const tabs = [
 ]
 
 export default function Dashboard({ client }: { client: APIClient }) {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [value, setValue] = React.useState(0);
     const { userData } = useUserDataRedux(client, true);
 
@@ -75,8 +77,23 @@ export default function Dashboard({ client }: { client: APIClient }) {
         return userData?.role;
     }, [userData])
 
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    // Verifica se há uma tab na URL e muda para ela
+    useEffect(() => {
+        const tabParam = searchParams.get('tab');
+        if (tabParam) {
+            const tabIndex = tabs.findIndex(tab => 
+                tab.label.toLowerCase() === tabParam.toLowerCase()
+            );
+            if (tabIndex !== -1) {
+                setValue(tabIndex);
+            }
+        }
+    }, [searchParams]);
+
+    const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
+        // Remove os parâmetros da URL ao trocar de tab manualmente
+        setSearchParams({});
     };
 
     const Renderer = tabs[value].renderer;
