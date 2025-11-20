@@ -12,8 +12,20 @@ exports.pingMaquina = async (req, res) => {
         [new Date(), id]
     );
 
+    // Verificar se a máquina está em alguma manutenção em aberto
+    const { rows: manutencaoRows } = await db.query(
+        `SELECT m.idmanutencao
+        FROM manutencaomaquina m
+        JOIN agendamento a ON m.idmanutencao = a.id
+        WHERE m.idmaquina = $1 AND a.datatempofim IS NULL`,
+        [id]
+    );
+
     res.status(200).send({
         success: true,
+        data: {
+            emManutencao: manutencaoRows.length > 0
+        }
     });
 }
 
@@ -90,7 +102,7 @@ exports.getMostFixedMaquinas = async (req, res) => {
                 GROUP BY maquinaId, nomePlat, tipoPlat
                 HAVING COUNT(*) > 1
             )
-            SELECT 
+            SELECT pi
                 vezesConsertada,
                 maquinaId,
                 nomePlat,
