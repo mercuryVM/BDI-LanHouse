@@ -9,8 +9,8 @@ Desenvolvido por:
  Felipe Ferreira – 15494604
  Gabriel Luis – 15494841
  Isabela Morija – 14579951
- 
-## 📋 Pré-requisitos
+
+## Pré-requisitos
 
 Antes de começar, certifique-se de ter instalado:
 
@@ -18,7 +18,7 @@ Antes de começar, certifique-se de ter instalado:
 - **PostgreSQL** (versão 17.6 ou superior)
 - **npm** ou **yarn** (gerenciador de pacotes)
 
-## ⚙️ Configuração Inicial
+## Configuração Inicial
 
 ### 1. Configurar o Banco de Dados
 
@@ -47,7 +47,7 @@ cd app
 npm install
 ```
 
-## 🚀 Executando o Projeto
+## Executando o Projeto
 
 Mantenha os dois terminais abertos e execute:
 
@@ -65,7 +65,7 @@ npm run dev
 
 O backend estará rodando e o frontend abrirá automaticamente.
 
-## 👤 Credenciais de Acesso
+## Credenciais de Acesso
 
 ### Usuário Comum
 - **Username:** `ana.silva`
@@ -75,7 +75,7 @@ O backend estará rodando e o frontend abrirá automaticamente.
 - **CPF:** `101.001.001-01`
 - **Senha:** `123`
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 BDI-Backend/
@@ -86,7 +86,7 @@ BDI-Backend/
     └── src/      # Código fonte do frontend
 ```
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - **Backend:** Node.js, Express
 - **Frontend:** React, TypeScript, Electron, Vite
