@@ -6,8 +6,8 @@ Sistema de gerenciamento de lan house com backend em Node.js e frontend em React
 
 Antes de começar, certifique-se de ter instalado:
 
-- **Node.js** (versão 14 ou superior)
-- **PostgreSQL** (versão 12 ou superior)
+- **Node.js** (versão 20 ou superior)
+- **PostgreSQL** (versão 17.6 ou superior)
 - **npm** ou **yarn** (gerenciador de pacotes)
 
 ## ⚙️ Configuração Inicial
@@ -18,6 +18,7 @@ Crie um arquivo `.env` na pasta `api/` com a seguinte configuração:
 
 ```env
 DATABASE_URL=postgresql://usuario:senha@localhost:5432/nome_do_banco
+PORT=8080
 ```
 
 Substitua `usuario`, `senha` e `nome_do_banco` pelas suas credenciais do PostgreSQL.
