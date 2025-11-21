@@ -4,11 +4,11 @@ Sistema de gerenciamento de lan house com backend em Node.js e frontend em React
 
 Desenvolvido por:
 
- Alan Moura – 15436668
- Arthur Hernandes – 15552518
- Felipe Ferreira – 15494604
- Gabriel Luis – 15494841
- Isabela Morija – 14579951
+ Alan Moura – 15436668  
+ Arthur Hernandes – 15552518  
+ Felipe Ferreira – 15494604  
+ Gabriel Luis – 15494841  
+ Isabela Morija – 14579951  
 
 ## Pré-requisitos
 
