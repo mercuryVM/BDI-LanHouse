@@ -2,7 +2,7 @@ import type { UserData, Game } from "../../../API/APIClient";
 import type APIClient from "../../../API/APIClient";
 import styles from './index.module.css';
 import React, { useEffect } from 'react';
-import { Box, Button, Card, CardContent, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography, Chip, Paper, Grid, Divider } from "@mui/material";
+import { Box, Button, Card, CardContent, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography, Chip, Paper, Divider } from "@mui/material";
 import { AccessTime, TrendingUp, People, Schedule, EventBusy, EmojiEvents, Computer, SportsEsports, DirectionsCar, Lightbulb } from "@mui/icons-material";
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
@@ -27,6 +27,8 @@ export function Home({ client, userData }: { client: APIClient, userData: UserDa
                 {isClient && <VIPStatus userData={userData} />}
                 {isClient && <LastGames userData={userData} client={client} />}
                 {isCLT && <MostPlayedGames client={client} />}
+                {isCLT && <DisponibilidadeMaquinas client={client} />}
+                
                 {isCLT && <MaquinasProblematicas client={client} />}
                 {isCLT && <ClienteStats client={client} />}
             </div>
@@ -133,6 +135,274 @@ function LastGames({ client }: { userData: UserData | null, client: APIClient })
             </div>
         </div>
     )
+}
+
+function DisponibilidadeMaquinas({ client }: { client: APIClient }) {
+    const navigate = useNavigate();
+    const [disponibilidadePorTipo, setDisponibilidadePorTipo] = React.useState<{
+        tipo: number;
+        disponiveis: string;
+    }[]>([]);
+    const [disponibilidadePorPlataforma, setDisponibilidadePorPlataforma] = React.useState<{
+        nome: string;
+        tipo: number;
+        disponiveis: string;
+    }[]>([]);
+    const [loading, setLoading] = React.useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [porTipo, porPlataforma] = await Promise.all([
+                    client.contarMaquinasDisponiveisPorTipo(),
+                    client.contarMaquinasDisponiveisPorPlataforma()
+                ]);
+                setDisponibilidadePorTipo(porTipo);
+                setDisponibilidadePorPlataforma(porPlataforma);
+            } catch (error) {
+                console.error('Erro ao carregar disponibilidade:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [client]);
+
+    const getTipoIcon = (tipo: number) => {
+        switch (tipo) {
+            case 0: return <Computer sx={{ fontSize: 32 }} />;
+            case 1: return <SportsEsports sx={{ fontSize: 32 }} />;
+            case 2: return <DirectionsCar sx={{ fontSize: 32 }} />;
+            default: return <Computer sx={{ fontSize: 32 }} />;
+        }
+    };
+
+    const getTipoNome = (tipo: number) => {
+        switch (tipo) {
+            case 0: return 'Computadores';
+            case 1: return 'Consoles';
+            case 2: return 'Simuladores';
+            default: return 'Desconhecido';
+        }
+    };
+
+    const getTipoColor = (tipo: number) => {
+        switch (tipo) {
+            case 0: return 'primary.main';
+            case 1: return 'success.main';
+            case 2: return 'warning.main';
+            default: return 'text.primary';
+        }
+    };
+
+    if (loading) {
+        return (
+            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    const totalDisponiveis = disponibilidadePorTipo.reduce((sum, item) => sum + parseInt(item.disponiveis), 0);
+
+    return (
+        <Box sx={{ mb: 4 }}>
+            {/* Header Section */}
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Box>
+                    <Typography variant="h5" fontWeight={700} color="text.primary">
+                        Disponibilidade de Máquinas
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        Visualize rapidamente as máquinas disponíveis por tipo e plataforma
+                    </Typography>
+                </Box>
+                <Button 
+                    variant="contained" 
+                    size="medium"
+                    onClick={() => navigate('/dashboard?tab=máquinas')}
+                    sx={{ minWidth: 140 }}
+                >
+                    Gerenciar
+                </Button>
+            </Box>
+
+            {/* Cards Resumo */}
+            <Box display="flex" gap={2} flexWrap="wrap" sx={{ mb: 4 }}>
+                {/* Card Total */}
+                <Card 
+                    elevation={0} 
+                    sx={{ 
+                        flex: '1 1 240px', 
+                        minWidth: 240,
+                        border: '1px solid',
+                                borderColor: 'divider',
+                        position: 'relative',
+                        overflow: 'visible'
+                    }}
+                >
+                    <CardContent sx={{ p: 3 }}>
+                        <Box display="flex" alignItems="center" gap={2}>
+                            <Box 
+                                sx={{ 
+                                    p: 1.5, 
+                                    borderRadius: 2, 
+                                    bgcolor: 'primary.main',
+                                    color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <Computer sx={{ fontSize: 32 }} />
+                            </Box>
+                            <Box flex={1}>
+                                <Typography variant="body2" color="primary.dark" fontWeight={500}>
+                                    Total Disponíveis
+                                </Typography>
+                                <Typography variant="h3" fontWeight={800} color="primary.main">
+                                    {totalDisponiveis}
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </CardContent>
+                </Card>
+
+                {/* Cards por Tipo */}
+                {disponibilidadePorTipo.map((item) => {
+                    const color = getTipoColor(item.tipo);
+                    const icon = getTipoIcon(item.tipo);
+                    return (
+                        <Card 
+                            key={item.tipo}
+                            elevation={0}
+                            sx={{ 
+                                flex: '1 1 240px', 
+                                minWidth: 240,
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                transition: 'all 0.3s ease',
+                                '&:hover': {
+                                    transform: 'translateY(-6px)',
+                                    boxShadow: 3,
+                                    borderColor: color
+                                }
+                            }}
+                        >
+                            <CardContent sx={{ p: 3 }}>
+                                <Box display="flex" alignItems="center" gap={2}>
+                                    <Box 
+                                        sx={{ 
+                                            p: 1.5, 
+                                            borderRadius: 2, 
+                                            bgcolor: 'action.hover',
+                                            color: color,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                    >
+                                        {icon}
+                                    </Box>
+                                    <Box flex={1}>
+                                        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                                            {getTipoNome(item.tipo)}
+                                        </Typography>
+                                        <Typography variant="h3" fontWeight={800} color={color}>
+                                            {item.disponiveis}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    );
+                })}
+            </Box>
+
+            {/* Detalhamento por Plataforma */}
+            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
+                <CardContent sx={{ p: 3 }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                        <Typography variant="h6" fontWeight={700}>
+                            Por Plataforma
+                        </Typography>
+                        <Chip 
+                            label={`${disponibilidadePorPlataforma.length} plataformas`} 
+                            size="small" 
+                            sx={{ fontWeight: 600 }}
+                        />
+                    </Box>
+
+                    <Box display="flex" gap={2} flexWrap="wrap">
+                        {disponibilidadePorPlataforma.map((plat, index) => (
+                            <Box key={index} sx={{ flex: '1 1 calc(33.333% - 14px)', minWidth: 280 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 2,
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: 2,
+                                        transition: 'all 0.2s',
+                                        '&:hover': {
+                                            borderColor: getTipoColor(plat.tipo),
+                                            bgcolor: 'action.hover',
+                                            transform: 'translateX(4px)'
+                                        }
+                                    }}
+                                >
+                                    <Box display="flex" alignItems="center" gap={2}>
+                                        <Box 
+                                            sx={{ 
+                                                p: 1,
+                                                borderRadius: 1.5,
+                                                bgcolor: 'action.hover',
+                                                color: getTipoColor(plat.tipo),
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}
+                                        >
+                                            {getTipoIcon(plat.tipo)}
+                                        </Box>
+                                        <Box flex={1}>
+                                            <Typography variant="body1" fontWeight={600}>
+                                                {plat.nome}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {getTipoNome(plat.tipo)}
+                                            </Typography>
+                                        </Box>
+                                        <Box 
+                                            sx={{
+                                                minWidth: 50,
+                                                textAlign: 'center',
+                                                py: 0.5,
+                                                px: 1.5,
+                                                borderRadius: 2,
+                                                bgcolor: parseInt(plat.disponiveis) > 0 ? 'success.light' : 'action.hover',
+                                                border: '1px solid',
+                                                borderColor: parseInt(plat.disponiveis) > 0 ? 'success.main' : 'divider'
+                                            }}
+                                        >
+                                            <Typography 
+                                                variant="h6" 
+                                                fontWeight={700}
+                                                color={parseInt(plat.disponiveis) > 0 ? 'success.dark' : 'text.secondary'}
+                                            >
+                                                {plat.disponiveis}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Paper>
+                            </Box>
+                        ))}
+                    </Box>
+                </CardContent>
+            </Card>
+        </Box>
+    );
 }
 
 function MaquinasProblematicas({ client }: { client: APIClient }) {
@@ -362,40 +632,39 @@ function ClienteStats({ client }: { client: APIClient }) {
             </Typography>
 
             {/* Tabs de Filtros */}
-            <Grid container spacing={1.5} sx={{ mb: 3 }}>
+            <Box display="flex" gap={1.5} flexWrap="wrap" sx={{ mb: 3 }}>
                 {filtros.map((filtro) => {
                     const Icon = filtro.icon;
                     const isActive = filtroAtivo === filtro.key;
                     return (
-                        <Grid item key={filtro.key}>
-                            <Paper
-                                elevation={isActive ? 8 : 1}
-                                onClick={() => setFiltroAtivo(filtro.key)}
-                                sx={{
-                                    p: 2,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s',
-                                    bgcolor: isActive ? filtro.color : 'background.paper',
-                                    color: isActive ? '#fff' : 'text.primary',
-                                    border: isActive ? 'none' : '1px solid',
-                                    borderColor: 'divider',
-                                    '&:hover': {
-                                        transform: 'translateY(-4px)',
-                                        boxShadow: 4
-                                    }
-                                }}
-                            >
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <Icon sx={{ fontSize: 20 }} />
-                                    <Typography variant="body2" fontWeight={isActive ? 600 : 500}>
-                                        {filtro.label}
-                                    </Typography>
-                                </Box>
-                            </Paper>
-                        </Grid>
+                        <Paper
+                            key={filtro.key}
+                            elevation={isActive ? 8 : 1}
+                            onClick={() => setFiltroAtivo(filtro.key)}
+                            sx={{
+                                p: 2,
+                                cursor: 'pointer',
+                                transition: 'all 0.3s',
+                                bgcolor: isActive ? filtro.color : 'background.paper',
+                                color: isActive ? '#fff' : 'text.primary',
+                                border: isActive ? 'none' : '1px solid',
+                                borderColor: 'divider',
+                                '&:hover': {
+                                    transform: 'translateY(-4px)',
+                                    boxShadow: 4
+                                }
+                            }}
+                        >
+                            <Box display="flex" alignItems="center" gap={1}>
+                                <Icon sx={{ fontSize: 20 }} />
+                                <Typography variant="body2" fontWeight={isActive ? 600 : 500}>
+                                    {filtro.label}
+                                </Typography>
+                            </Box>
+                        </Paper>
                     );
                 })}
-            </Grid>
+            </Box>
 
             {/* Card Principal */}
             <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>

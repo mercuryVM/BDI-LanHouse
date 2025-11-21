@@ -1,10 +1,11 @@
-import { Box, Button, Card, Chip, CircularProgress, LinearProgress, TextField, Typography, Paper, InputAdornment, IconButton, Divider, Stack, Avatar } from "@mui/material";
+import { Box, Button, Chip, CircularProgress, LinearProgress, TextField, Typography, Paper, InputAdornment, IconButton, Divider, Stack, Avatar, Alert } from "@mui/material";
 import styles from "./index.module.css";
 import { useCallback, useState } from "react";
 import { useNavigate, type NavigateFunction } from "react-router";
 import type APIClient from "../../API/APIClient";
 import { useMaquinaId } from "../../Hooks/useMaquinaId";
-import { Computer, Lock, Person, Visibility, VisibilityOff, SportsEsports, AdminPanelSettings, Gamepad } from "@mui/icons-material";
+import { useManutencaoStatus } from "../../Hooks/useManutencaoStatus";
+import { Computer, Lock, Person, Visibility, VisibilityOff, SportsEsports, AdminPanelSettings, Gamepad, Build } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppDispatch } from "../../Hooks/reduxHooks";
 import { clearError } from "../../store/slices/userDataSlice";
@@ -17,12 +18,18 @@ export default function Home({ client }: { client: APIClient }) {
     const [showPassword, setShowPassword] = useState<boolean>(false);
 
     const maquinaId = useMaquinaId();
+    const { emManutencao } = useManutencaoStatus(client, maquinaId);
     const dispatch = useAppDispatch();
 
     const navigate: NavigateFunction = useNavigate();
 
     const handleLogin = useCallback(async () => {
         setError(null);
+
+        if (emManutencao) {
+            setError("Esta máquina está em manutenção.");
+            return;
+        }
 
         if (!username || !password) {
             setError("Por favor, preencha todos os campos.");
@@ -44,7 +51,7 @@ export default function Home({ client }: { client: APIClient }) {
         } finally {
             setLoading(false);
         }
-    }, [username, password, dispatch, navigate, client]);
+    }, [username, password, dispatch, navigate, client, emManutencao]);
 
     return (
         <div className={styles.container}>
@@ -182,6 +189,30 @@ export default function Home({ client }: { client: APIClient }) {
                     </Box>
                 </motion.div>
 
+                <AnimatePresence>
+                    {emManutencao && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10, scale: 0.8 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <Alert 
+                                severity="warning" 
+                                icon={<Build />}
+                                sx={{ mt: 3 }}
+                            >
+                                <Typography variant="body2" fontWeight="bold">
+                                    Máquina em Manutenção
+                                </Typography>
+                                <Typography variant="caption">
+                                    Esta máquina está temporariamente indisponível. Por favor, aguarde ou utilize outra máquina.
+                                </Typography>
+                            </Alert>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -189,11 +220,11 @@ export default function Home({ client }: { client: APIClient }) {
                 >
                     <Box mt={4}>
                         <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={{ scale: emManutencao ? 1 : 1.02 }}
+                            whileTap={{ scale: emManutencao ? 1 : 0.98 }}
                         >
                             <Button 
-                                disabled={loading} 
+                                disabled={loading || emManutencao} 
                                 onClick={handleLogin} 
                                 fullWidth 
                                 variant="contained" 
@@ -202,24 +233,6 @@ export default function Home({ client }: { client: APIClient }) {
                                 startIcon={<Gamepad />}
                             >
                                 Entrar
-                            </Button>
-                        </motion.div>
-
-                        <Divider sx={{ my: 2 }}>
-                            <Typography variant="caption" color="text.secondary">ou</Typography>
-                        </Divider>
-
-                        <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                        >
-                            <Button 
-                                fullWidth 
-                                variant="outlined" 
-                                startIcon={<AdminPanelSettings />}
-                                sx={{ borderStyle: 'dashed' }}
-                            >
-                                Chamar Administrador
                             </Button>
                         </motion.div>
 

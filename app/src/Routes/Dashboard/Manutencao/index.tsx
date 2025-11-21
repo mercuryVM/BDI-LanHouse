@@ -1027,13 +1027,13 @@ export function Manutencao({ client, userData }: { client: APIClient, userData: 
                                                 />
                                                 {isSelected && (
                                                     <TextField
-                                                        fullWidth
+                                                        
                                                         size="small"
                                                         label="Motivo do problema"
                                                         placeholder="Ex: Superaquecimento, não liga, ruído estranho..."
                                                         value={hardwareData?.motivo || ''}
                                                         onChange={(e) => handleHardwareMotivoChange(hardware.hardwareid, e.target.value)}
-                                                        sx={{ mt: 1, ml: 4 }}
+                                                        sx={{ mt: 1, ml: 4, minWidth: 0 }}
                                                         required
                                                     />
                                                 )}

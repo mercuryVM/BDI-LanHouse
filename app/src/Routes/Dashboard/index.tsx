@@ -7,10 +7,12 @@ import MaquinasIcon from "@mui/icons-material/ComputerTwoTone";
 import ComprasIcon from "@mui/icons-material/ShoppingCart";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import React, { useMemo, useEffect } from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams, useNavigate } from "react-router";
 import { Home } from "./Home";
 import type APIClient from "../../API/APIClient";
 import { useUserDataRedux } from "../../hooks/useUserDataRedux";
+import { useMaquinaId } from "../../Hooks/useMaquinaId";
+import { useManutencaoStatus } from "../../Hooks/useManutencaoStatus";
 import { Game } from "./Game";
 import { Clientes } from "./Clientes";
 import { Sessoes } from "./Sessoes/Sessoes";
@@ -80,6 +82,9 @@ export default function Dashboard({ client }: { client: APIClient }) {
     const [searchParams, setSearchParams] = useSearchParams();
     const [value, setValue] = React.useState(0);
     const { userData } = useUserDataRedux(client, true);
+    const navigate = useNavigate();
+    const maquinaId = useMaquinaId();
+    const { emManutencao } = useManutencaoStatus(client, maquinaId);
 
     const userRole = useMemo(() => {
         return userData?.role;
@@ -97,6 +102,21 @@ export default function Dashboard({ client }: { client: APIClient }) {
             }
         }
     }, [searchParams]);
+
+    // Desconecta o usuário se a máquina entrar em manutenção
+    useEffect(() => {
+        console.log('Manutenção status changed:', emManutencao);
+        if (emManutencao && userData) {
+            // Fazer logout
+            client.logout().then(() => {
+                navigate('/');
+            }).catch((error) => {
+                console.error('Erro ao fazer logout:', error);
+                // Mesmo com erro, redireciona
+                navigate('/');
+            });
+        }
+    }, [emManutencao, userData, client, navigate]);
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);

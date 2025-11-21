@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import Home from './Routes/Home'
@@ -55,22 +54,6 @@ const theme = createTheme({
 
 function App() {
   const client: APIClient = useClient();
-
-  useEffect(() => {
-    async function pingMaquina() {
-      try {
-        const maquinaId = await window.api.getMaquinaId();
-        await client.post('/pingMaquina', { id: maquinaId });
-      } catch (error) {
-        console.error('Failed to ping maquina:', error);
-      }
-    }
-
-    pingMaquina();
-    const intervalId = setInterval(pingMaquina, 10 * 1000);
-
-    return () => clearInterval(intervalId);
-  }, []) // Removido client das dependências - ele é estável
 
   return (
     <BrowserRouter>
