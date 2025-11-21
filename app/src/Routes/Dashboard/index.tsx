@@ -5,22 +5,18 @@ import UserIcon from "@mui/icons-material/Group";
 import SessionIcon from "@mui/icons-material/Computer";
 import MaquinasIcon from "@mui/icons-material/ComputerTwoTone";
 import ComprasIcon from "@mui/icons-material/ShoppingCart";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import React, { useMemo, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router";
+import EventIcon from "@mui/icons-material/Event";
+import React, { useMemo } from "react";
 import { Home } from "./Home";
 import type APIClient from "../../API/APIClient";
 import { useUserDataRedux } from "../../hooks/useUserDataRedux";
-import { useMaquinaId } from "../../Hooks/useMaquinaId";
-import { useManutencaoStatus } from "../../Hooks/useManutencaoStatus";
 import { Game } from "./Game";
 import { Clientes } from "./Clientes";
 import { Sessoes } from "./Sessoes/Sessoes";
 import { Maquinas } from "./Maquinas";
 import { Pacotes } from "./Pacotes";
 import { Manutencao } from "./Manutencao";
-import { Hardware } from "./Hardware";
-import { Comandas } from "./Comandas";
+import { Eventos } from "./Eventos";
 
 
 const tabs = [
@@ -57,12 +53,6 @@ const tabs = [
         icon: <ComprasIcon />,
         permission: 'clt',
         renderer: Pacotes
-    },
-    {
-        label: "Comandas",
-        icon: <ReceiptIcon />,
-        permission: 'clt',
-        renderer: Comandas
     }, 
     {
         label: "Manutenções",
@@ -71,57 +61,23 @@ const tabs = [
         renderer: Manutencao
     },
     {
-        label: "Hardware",
-        icon: <MaquinasIcon />,
+        label: "Eventos",
+        icon: <EventIcon />,
         permission: 'clt',
-        renderer: Hardware
+        renderer: Eventos
     }
 ]
 
 export default function Dashboard({ client }: { client: APIClient }) {
-    const [searchParams, setSearchParams] = useSearchParams();
     const [value, setValue] = React.useState(0);
     const { userData } = useUserDataRedux(client, true);
-    const navigate = useNavigate();
-    const maquinaId = useMaquinaId();
-    const { emManutencao } = useManutencaoStatus(client, maquinaId);
 
     const userRole = useMemo(() => {
         return userData?.role;
     }, [userData])
 
-    // Verifica se há uma tab na URL e muda para ela
-    useEffect(() => {
-        const tabParam = searchParams.get('tab');
-        if (tabParam) {
-            const tabIndex = tabs.findIndex(tab => 
-                tab.label.toLowerCase() === tabParam.toLowerCase()
-            );
-            if (tabIndex !== -1) {
-                setValue(tabIndex);
-            }
-        }
-    }, [searchParams]);
-
-    // Desconecta o usuário se a máquina entrar em manutenção
-    useEffect(() => {
-        console.log('Manutenção status changed:', emManutencao);
-        if (emManutencao && userData) {
-            // Fazer logout
-            client.logout().then(() => {
-                navigate('/');
-            }).catch((error) => {
-                console.error('Erro ao fazer logout:', error);
-                // Mesmo com erro, redireciona
-                navigate('/');
-            });
-        }
-    }, [emManutencao, userData, client, navigate]);
-
-    const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
+    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
-        // Remove os parâmetros da URL ao trocar de tab manualmente
-        setSearchParams({});
     };
 
     const Renderer = tabs[value].renderer;

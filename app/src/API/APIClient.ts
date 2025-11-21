@@ -127,6 +127,26 @@ export interface Hardware {
     motivo?: string | null;
 }
 
+export interface Evento {
+    eventoid: number;
+    eventonome: string;
+    eventodescricao?: string | null;
+    eventodatatempoinicio: Date;
+    eventodatatempofim?: Date | null;
+    eventostatus: string;
+    nomefuncionario: string;
+    cpffuncionario: string;
+    maquinas: {
+        maquinaid: number;
+        nomeplat: string;
+        tipoplat: number;
+    }[];
+    cliente: {
+        cpf: string;
+        nome: string;
+    } | null;
+}
+
 export default class APIClient {
     client: AxiosInstance;
     userData: UserData | null = null;
@@ -661,6 +681,57 @@ export default class APIClient {
     async deleteManutencao(id: number): Promise<void> {
         try {
             await this.delete<void>(`/manutencao?id=${id}`);
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async getEventos(): Promise<Evento[]> {
+        try {
+            const eventos = await this.get<Evento[]>('/getEventos');
+            return eventos;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async createEvento(data: {
+        nome: string;
+        descricao?: string;
+        datatempoinicio: string;
+        datatempofim?: string;
+        status?: string;
+        clienteCpf: string;
+        maquinaIds: number[];
+        agendadoPor: string;
+    }): Promise<ApiResponse<{ id: number }>> {
+        try {
+            const response = await this.postRaw('/createEvento', data);
+            return response;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async updateEvento(id: number, data: {
+        nome?: string;
+        descricao?: string;
+        datatempoinicio?: string;
+        datatempofim?: string;
+        status?: string;
+        clienteCpf?: string;
+        maquinaIds?: number[];
+    }): Promise<void> {
+        try {
+            await this.put<void>(`/updateEvento?id=${id}`, data);
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async deleteEvento(id: number): Promise<void> {
+        try {
+            await this.delete<void>(`/deleteEvento?id=${id}`);
         } catch (error) {
             throw this.handleError(error);
         }
