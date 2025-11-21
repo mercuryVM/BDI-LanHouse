@@ -341,6 +341,55 @@ export default class APIClient {
         }
     }
 
+    async listarMaquinasDisponiveis(): Promise<{
+        id: number;
+        nome: string;
+        tipo: number;
+    }[]> {
+        try {
+            const result = await this.get<{
+                id: number;
+                nome: string;
+                tipo: number;
+            }[]>('/listarMaquinasDisponiveis');
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async contarMaquinasDisponiveisPorTipo(): Promise<{
+        tipo: number;
+        disponiveis: string;
+    }[]> {
+        try {
+            const result = await this.get<{
+                tipo: number;
+                disponiveis: string;
+            }[]>('/contarMaquinasDisponiveisPorTipo');
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async contarMaquinasDisponiveisPorPlataforma(): Promise<{
+        nome: string;
+        tipo: number;
+        disponiveis: string;
+    }[]> {
+        try {
+            const result = await this.get<{
+                nome: string;
+                tipo: number;
+                disponiveis: string;
+            }[]>('/contarMaquinasDisponiveisPorPlataforma');
+            return result;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     async getAllComandas(): Promise<{
         id: number;
         data: string;
