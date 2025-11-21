@@ -6,5 +6,6 @@ router.post('/agendamento', authMiddleware, authRequireType(['funcionario']), ag
 router.get('/agendamento', authMiddleware, authRequireType(['funcionario']), agendamentoController.getAgendamento);
 router.delete('/agendamento', authMiddleware, authRequireType(['funcionario']), agendamentoController.deleteAgendamento);
 router.put('/agendamento', authMiddleware, authRequireType(['funcionario']), agendamentoController.updateAgendamento, agendamentoController.getAgendamento);
+router.get('/getAgendamentoFiltrado', authMiddleware, authRequireType(['funcionario']), agendamentoController.getAgendamentoFiltrado)
 
 module.exports = router;

@@ -48,7 +48,7 @@ exports.getAgendamento = async (req, res) => {
 
     // RF15 - Seleção do agendamento no banco a partir do identificador
     const { rows } = await db.query(
-        "SELECT rg, datatempoinicio, datatempofim FROM agendamento WHERE id = $1",
+        "SELECT id, datatempoinicio, datatempofim, agendadopor FROM agendamento WHERE id = $1",
         [id]
     );
     const agendamento = rows[0];
@@ -67,7 +67,8 @@ exports.getAgendamento = async (req, res) => {
             agendamento: {
                 id: agendamento.id,
                 datatempoinicio: agendamento.datatempoinicio,
-                datatempofim: agendamento.datatempofim
+                datatempofim: agendamento.datatempofim,
+                agendadopor: agendamento.agendadopor
             }
         },
     });
@@ -134,4 +135,90 @@ exports.updateAgendamento = async (req, res, next) => {
     }
 
     next();
+}
+
+exports.getAgendamentoFiltrado = async (req, res, next) => {
+    const { datatempoinicio, datatempofim, agendadopor, maquina } = req.query;
+    const params = [];
+    let paramCount = 0;
+
+    let query;
+    if(maquina){
+        paramCount++;
+        query = `(
+                    SELECT
+                        a.id,
+                        a.datatempoinicio,
+                        a.datatempofim,
+                        a.agendadopor
+                    FROM
+                        agendamento AS a
+                    JOIN
+                        manutencaomaquina AS m ON a.id = m.idmanutencao
+                    WHERE m.idmaquina = $${paramCount}
+                )
+
+                UNION
+
+                (
+                    SELECT
+                        a.id,
+                        a.datatempoinicio,
+                        a.datatempofim,
+                        a.agendadopor
+                    FROM
+                        agendamento AS a
+                    JOIN
+                        eventomaquina AS e ON a.id = e.evento
+                    WHERE e.maquina = $${paramCount}
+                )`;
+        params.push(maquina);
+    }
+    else{
+        query = `SELECT a.id, a.datatempoinicio, a.datatempofim, a.agendadopor FROM agendamento AS a WHERE 1 = 1`;
+    }
+    
+
+    if (datatempoinicio) {
+        paramCount++;
+        query += ` AND a.datatempoinicio >= $${paramCount}`;
+        params.push(datatempoinicio);
+    }
+
+    if (datatempofim) {
+        paramCount++;
+        query += ` AND (a.datatempofim <= $${paramCount} OR a.datatempofim IS NULL)`;
+        params.push(datatempofim);
+    }
+
+    if (agendadopor){
+        paramCount++;
+        query += ` AND (a.agendadopor = $${paramCount})`;
+        params.push(agendadopor);
+    }
+
+    const { rows } = await db.query(query, params);
+
+    if (rows.length === 0) {
+        return res.status(404).send({
+            success: false,
+            errors: ["Nenhum agendamento encontrado!"],
+        });
+    }
+
+    res.status(200).send({
+        success: true,
+        message: "Agendamentos filtrados consultados com sucesso!",
+        data: rows.map((agendamento) => {
+            if(agendamento.datatempofim)
+            return {
+                id: agendamento.id,
+                datatempoinicio: agendamento.datatempoinicio,
+                datatempofim: agendamento.datatempofim,
+                agendadopor: agendamento.agendadopor,
+                isFinalizado: !!agendamento.datatempofim
+            }
+        })
+
+    });
 }
