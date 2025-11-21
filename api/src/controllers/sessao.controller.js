@@ -85,6 +85,54 @@ exports.getSessoes = async (req, res) => {
                 }
             }
         })
-
     });
 };
+
+exports.iniciarJogoNaSessao = async (req, res) => {
+    const cpf = req.body.cpf;
+    const datatempoinicio = req.body.datatempoinicio;
+    const jogo = req.body.jogo;
+
+    if(!cpf || !datatempoinicio || !jogo){
+        res.status(400).send({
+            success: false,
+            message: "Parâmetros de inserção inválidos"
+        });
+        return;
+    }
+
+    await db.query(`
+        INSERT INTO sessaoJogo (cliente, datatempoinicio, jogo, datatempofim) VALUES ($1, $2, $3, NULL);    
+    `, [cpf, datatempoinicio, jogo]);
+
+    res.status(201).send({
+        success: true,
+        message: "Jogo iniciado"
+    });
+    return;
+}
+
+exports.encerrarJogoNaSessao = async (req, res) => {
+    const cpf = req.body.cpf;
+    const datatempoinicio = req.body.datatempoinicio;
+    const jogo = req.body.jogo;
+    const datatempofim = req.body.datatempofim;
+
+    if(!cpf || !datatempoinicio || !jogo || !datatempofim){
+        res.status(400).send({
+            success: false,
+            message: "Parâmetros inválidos"
+        });
+        return;
+    }
+
+    await db.query(`
+        UPDATE sessaoJogo SET dataTempoFim = $1 WHERE cliente = $2 AND datatempoinicio = $3 AND jogo = $4;
+    `, [datatempofim, cpf, datatempoinicio, jogo]);
+
+    res.status(200).send({
+        success: true,
+        message: "Jogo encerrado"
+    });
+    return;
+}
