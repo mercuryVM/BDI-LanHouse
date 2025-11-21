@@ -139,6 +139,24 @@ exports.createManutencao = async (req, res) => {
     } = req.body;
 
     try {
+        const {rows} = await db.query(`
+            SELECT mm.idMaquina
+                FROM agendamento a 
+                JOIN manutencao m ON(a.id = m.id) 
+                JOIN manutencaoMaquina mm ON (m.id = mm.idManutencao) 
+            WHERE DATE_TRUNC('day', a.dataTempoInicio) = DATE_TRUNC('day', $1::timestamptz) 
+                AND mm.idmaquina = $2 
+            GROUP BY mm.idMaquina;
+        `, [datatempoinicio, maquinaId]);
+
+        if(rows.length > 0){
+            res.status(409).send({
+                success: true,
+                message: "Já existe uma manutenção agendada para a máquina " + maquinaId + " neste dia",
+            });
+            return;
+        }
+
         // Gera ID único para agendamento/manutenção
         const idResult = await db.query(
             "SELECT COALESCE(MAX(id), 0) + 1 as nextId FROM agendamento"
