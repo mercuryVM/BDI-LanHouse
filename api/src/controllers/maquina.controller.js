@@ -12,20 +12,8 @@ exports.pingMaquina = async (req, res) => {
         [new Date(), id]
     );
 
-    // Verificar se a máquina está em alguma manutenção em aberto
-    const { rows: manutencaoRows } = await db.query(
-        `SELECT m.idmanutencao
-        FROM manutencaomaquina m
-        JOIN agendamento a ON m.idmanutencao = a.id
-        WHERE m.idmaquina = $1 AND a.datatempofim IS NULL`,
-        [id]
-    );
-
     res.status(200).send({
         success: true,
-        data: {
-            emManutencao: manutencaoRows.length > 0
-        }
     });
 }
 
@@ -77,60 +65,29 @@ exports.getAllMaquinas = async (req, res) => {
 // • “máquinas com mais registros de defeitos / mais manutenções”
 // • Usado para identificar máquinas problemáticas e possíveis pontos de falha recorrente
 exports.getMostFixedMaquinas = async (req, res) => {
-    try {
-        const { rows } = await db.query(
-            `WITH manutencoes_recentes AS (
-                SELECT 
-                    m.id as maquinaId,
-                    p.nome as nomePlat,
-                    p.tipo as tipoPlat,
-                    ag.datatempoinicio as datahora,
-                    LAG(ag.datatempoinicio) OVER (PARTITION BY m.id ORDER BY ag.datatempoinicio) as manutencao_anterior 
-                FROM maquina m 
-                JOIN manutencaomaquina man ON m.id = man.idmaquina 
-                JOIN agendamento ag ON ag.id = man.idmanutencao 
-                JOIN plataforma p ON m.nomeplat = p.nome
-            ),
-            maquinas_problematicas AS (
-                SELECT 
-                    maquinaId,
-                    nomePlat,
-                    tipoPlat,
-                    COUNT(*) as vezesConsertada,
-                    MIN(datahora - manutencao_anterior) as menor_intervalo
-                FROM manutencoes_recentes
-                GROUP BY maquinaId, nomePlat, tipoPlat
-                HAVING COUNT(*) > 1
-            )
-            SELECT pi
-                vezesConsertada,
-                maquinaId,
-                nomePlat,
-                tipoPlat,
-                EXTRACT(DAYS FROM menor_intervalo) as dias_menor_intervalo
-            FROM maquinas_problematicas
-            ORDER BY vezesConsertada DESC, menor_intervalo ASC
-            LIMIT 10`
-        );
+    const { rows } = await db.query(
+        `SELECT COUNT(*) as vezesConsertada, m.id as maquinaId, p.nome as nomePlat, p.tipo as tipoPlat
+        FROM maquina m 
+        JOIN manutencaomaquina man ON m.id = man.idmaquina 
+        JOIN plataforma p ON m.nomeplat = p.nome
+        GROUP BY m.id, p.nome, p.tipo
+        ORDER BY vezesConsertada 
+        DESC LIMIT 10 
+        `
+    )
 
-        res.status(200).send({
-            success: true,
-            message: "Maquinas consultadas com sucesso!",
-            data: rows.map((row) => ({
-                vezesConsertada: parseInt(row.vezesconsertada),
-                id: row.maquinaid,
-                nomePlataforma: row.nomeplat,
-                tipoPlataforma: row.tipoplat,
-                diasMenorIntervalo: row.dias_menor_intervalo ? Math.floor(row.dias_menor_intervalo) : null
-            }))
-        });
-    } catch (error) {
-        console.error("Erro ao buscar máquinas com problemas recorrentes:", error);
-        res.status(500).send({
-            success: false,
-            errors: ["Erro ao buscar máquinas problemáticas: " + error.message]
-        });
-    }
+    res.status(200).send({
+        success: true,
+        message: "Maquinas consultadas com sucesso!",
+        data: rows.map((row) => {
+            return {
+                vezesConsertada: row.vezesConsertada,
+                id: row.maquinaId,
+                nomePlataforma: row.nomePlat,
+                tipoPlataforma: row.tipoPlat
+            }
+        })
+    })
 }
 
 // Listar hardwares disponíveis no estoque (sem máquina)
@@ -224,83 +181,5 @@ exports.removeHardwareFromMaquina = async (req, res) => {
             success: false,
             errors: ["Erro ao remover hardware: " + error.message]
         });
-    }
-}
-
-exports.listarMaquinasDisponiveis = async (req, res) => {
-    const {rows} = await db.query(`
-        SELECT m.id, p.nome, p.tipo FROM maquina m JOIN plataforma p ON p.nome = m.nomePlat WHERE id NOT IN (
-            SELECT mm.idMaquina FROM manutencao m JOIN agendamento a ON (m.id = a.id) JOIN manutencaoMaquina mm ON (mm.idManutencao = m.id) WHERE datatempofim IS NULL GROUP BY mm.idMaquina
-                UNION
-            SELECT maquina as idMaquina FROM sessao WHERE datatempofim IS NULL GROUP BY maquina
-        ) ORDER BY m.id;    
-    `);
-
-    if(rows.length > 0){
-        res.status(200).send({
-            success: true,
-            data: rows,
-            message: "Máquina(s) encontrada(s)"
-        });
-        return;
-    }
-    else{
-        res.status(404).send({
-            success: false,
-            message: "Nenhuma máquina encontrada"
-        });
-        return;
-    }
-}
-
-exports.contarMaquinasDisponiveisPorTipo = async (req, res) => {
-    const {rows} = await db.query(`
-        SELECT p.tipo, COUNT(m.id) as disponiveis FROM maquina m JOIN plataforma p ON p.nome = m.nomePlat WHERE id NOT IN (
-            SELECT mm.idMaquina FROM manutencao m JOIN agendamento a ON (m.id = a.id) JOIN manutencaoMaquina mm ON (mm.idManutencao = m.id) WHERE datatempofim IS NULL GROUP BY mm.idMaquina
-                UNION
-            SELECT maquina as idMaquina FROM sessao WHERE datatempofim IS NULL GROUP BY maquina
-        ) GROUP BY p.tipo ORDER BY p.tipo;    
-    `);
-
-    if(rows.length > 0){
-        res.status(200).send({
-            success: true,
-            data: rows,
-            message: "Máquina(s) encontrada(s)"
-        });
-        return;
-    }
-    else{
-        res.status(404).send({
-            success: false,
-            message: "Nenhuma máquina encontrada"
-        });
-        return;
-    }
-}
-
-exports.contarMaquinasDisponiveisPorPlataforma = async (req, res) => {
-    const {rows} = await db.query(`
-        SELECT p.nome, p.tipo, COUNT(m.id) as disponiveis FROM maquina m JOIN plataforma p ON p.nome = m.nomePlat WHERE id NOT IN (
-            SELECT mm.idMaquina FROM manutencao m JOIN agendamento a ON (m.id = a.id) JOIN manutencaoMaquina mm ON (mm.idManutencao = m.id) WHERE datatempofim IS NULL GROUP BY mm.idMaquina
-                UNION
-            SELECT maquina as idMaquina FROM sessao WHERE datatempofim IS NULL GROUP BY maquina
-        ) GROUP BY p.nome, p.tipo ORDER BY p.tipo;
-    `);
-
-    if(rows.length > 0){
-        res.status(200).send({
-            success: true,
-            data: rows,
-            message: "Máquina(s) encontrada(s)"
-        });
-        return;
-    }
-    else{
-        res.status(404).send({
-            success: false,
-            message: "Nenhuma máquina encontrada"
-        });
-        return;
     }
 }
