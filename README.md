@@ -68,11 +68,11 @@ O backend estará rodando e o frontend abrirá automaticamente.
 ## Credenciais de Acesso
 
 ### Usuário Comum
-- **Username:** `ana.silva`
+- **Username:** `alan123`
 - **Senha:** `123`
 
 ### Administrador
-- **CPF:** `101.001.001-01`
+- **CPF:** `111.111.111-11`
 - **Senha:** `123`
 
 ## Estrutura do Projeto
