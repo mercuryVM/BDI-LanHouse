@@ -1,4 +1,4 @@
-# BDI-Backend
+# BDI-LanHouse
 
 Sistema de gerenciamento de lan house com backend em Node.js e frontend em React/Electron.
 
