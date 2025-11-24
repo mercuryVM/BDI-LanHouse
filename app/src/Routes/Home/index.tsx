@@ -295,7 +295,7 @@ export default function Home({ client }: { client: APIClient }) {
                     </Stack>
                     
                     <Typography variant="caption" display="block" textAlign={"center"} color="text.secondary">
-                        Sistema desenvolvido por Grupo 06
+                        Sistema desenvolvido por Grupo 05
                     </Typography>
                 </motion.div>
             </motion.div>
