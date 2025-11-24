@@ -53,7 +53,6 @@ function createWindow () {
     
     if(isDev) {
         mainWindow.loadURL('http://localhost:5173');
-        mainWindow.webContents.openDevTools(); // Open DevTools in dev mode
     } else {
         mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
     }

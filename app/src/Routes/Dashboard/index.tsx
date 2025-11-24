@@ -6,7 +6,7 @@ import SessionIcon from "@mui/icons-material/Computer";
 import MaquinasIcon from "@mui/icons-material/ComputerTwoTone";
 import ComprasIcon from "@mui/icons-material/ShoppingCart";
 import EventIcon from "@mui/icons-material/Event";
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { Home } from "./Home";
 import type APIClient from "../../API/APIClient";
 import { useUserDataRedux } from "../../hooks/useUserDataRedux";
@@ -20,6 +20,7 @@ import { Eventos } from "./Eventos";
 import { Hardware, ListAlt } from "@mui/icons-material";
 import { HardwareScreen } from "./Hardware";
 import { Comandas } from "./Comandas";
+import { useNavigate, useSearchParams } from "react-router";
 
 
 const tabs = [
@@ -84,15 +85,28 @@ const tabs = [
 ]
 
 export default function Dashboard({ client }: { client: APIClient }) {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [value, setValue] = React.useState(0);
-    const { userData } = useUserDataRedux(client, true);
+    const navigate = useNavigate();
+    const { userData } = useUserDataRedux(client, true, navigate);
 
     const userRole = useMemo(() => {
         return userData?.role;
     }, [userData])
 
+    useEffect(() => {
+        const tabParam = searchParams.get('tab');
+        if (tabParam !== null) {
+            const tabIndex = tabs.findIndex((tab, index) => tab.label.toLowerCase() === tabParam.toLowerCase());
+            if (tabIndex !== -1) {
+                setValue(tabIndex);
+            }
+        }
+    }, [searchParams]);
+
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
+        setSearchParams({ tab: newValue.toString() });
     };
 
     const Renderer = tabs[value].renderer;
