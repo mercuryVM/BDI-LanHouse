@@ -16,7 +16,33 @@ Antes de começar, certifique-se de ter instalado:
 
 - **Node.js** (versão 20 ou superior)
 - **PostgreSQL** (versão 17.6 ou superior)
-- **npm** ou **yarn** (gerenciador de pacotes)
+- **Yarn** (gerenciador de pacotes)
+
+### Instalando o Node.js
+
+1. Acesse o site oficial: [https://nodejs.org](https://nodejs.org)
+2. Baixe a versão **LTS** (Long Term Support) - recomendada para a maioria dos usuários
+3. Execute o instalador e siga as instruções na tela
+4. Após a instalação, verifique se foi instalado corretamente:
+
+```bash
+node --version
+npm --version
+```
+
+### Instalando o Yarn
+
+Após instalar o Node.js, instale o Yarn globalmente:
+
+```bash
+npm install -g yarn
+```
+
+Verifique a instalação:
+
+```bash
+yarn --version
+```
 
 ## Configuração Inicial
 
@@ -38,13 +64,13 @@ Abra dois terminais e navegue até as pastas correspondentes:
 **Terminal 1 - Backend (API):**
 ```bash
 cd api
-npm install
+yarn install
 ```
 
 **Terminal 2 - Frontend (App):**
 ```bash
 cd app
-npm install
+yarn install
 ```
 
 ## Executando o Projeto
@@ -60,7 +86,7 @@ node server.js
 **Terminal 2 - Frontend:**
 ```bash
 cd app
-npm run dev
+yarn dev
 ```
 
 O backend estará rodando e o frontend abrirá automaticamente.
