@@ -87,8 +87,7 @@ const tabs = [
 export default function Dashboard({ client }: { client: APIClient }) {
     const [searchParams, setSearchParams] = useSearchParams();
     const [value, setValue] = React.useState(0);
-    const navigate = useNavigate();
-    const { userData } = useUserDataRedux(client, true, navigate);
+    const { userData } = useUserDataRedux(client, true);
 
     const userRole = useMemo(() => {
         return userData?.role;
