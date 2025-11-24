@@ -102,7 +102,7 @@ export default function Home({ client }: { client: APIClient }) {
                 >
                     <Box mt={2}>
                         <Typography variant="subtitle1" gutterBottom textAlign={"center"} fontWeight={600}>
-                            Computador
+                            Dispositivo
                         </Typography>
                         <motion.div
                             initial={{ scale: 0 }}
