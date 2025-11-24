@@ -44,7 +44,7 @@ import {
 } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function Hardware({ client }: { client: APIClient }) {
+export function HardwareScreen({ client }: { client: APIClient }) {
     const [hardwares, setHardwares] = useState<Hardware[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");

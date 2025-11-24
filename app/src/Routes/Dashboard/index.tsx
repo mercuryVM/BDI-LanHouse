@@ -17,6 +17,9 @@ import { Maquinas } from "./Maquinas";
 import { Pacotes } from "./Pacotes";
 import { Manutencao } from "./Manutencao";
 import { Eventos } from "./Eventos";
+import { Hardware, ListAlt } from "@mui/icons-material";
+import { HardwareScreen } from "./Hardware";
+import { Comandas } from "./Comandas";
 
 
 const tabs = [
@@ -43,6 +46,12 @@ const tabs = [
         renderer: Sessoes
     },
     {
+        label: "Comandas",
+        icon: <ListAlt />,
+        permission: 'clt',
+        renderer: Comandas
+    },
+    {
         label: "Máquinas",
         icon: <MaquinasIcon />,
         permission: 'clt',
@@ -65,7 +74,13 @@ const tabs = [
         icon: <EventIcon />,
         permission: 'clt',
         renderer: Eventos
-    }
+    },
+    {
+        label: "Hardwares",
+        icon: <Hardware />,
+        permission: 'clt',
+        renderer: HardwareScreen
+    },
 ]
 
 export default function Dashboard({ client }: { client: APIClient }) {
