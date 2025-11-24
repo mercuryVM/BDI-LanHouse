@@ -192,21 +192,21 @@ exports.createClientePacote = async (req, res) => {
         if (pacote.tempocomputador) {
             await client.query(
                 "UPDATE cliente SET tempocomputador = $1 WHERE cpf = $2",
-                [Number(cliente.tempocomputador || 0) + Number(pacote.tempocomputador), cpf]
+                [Number(cliente.tempocomputador || 0) + Number(pacote.tempocomputador) * 60, cpf]
             );
         }
 
         if (pacote.tempoconsole) {
             await client.query(
                 "UPDATE cliente SET tempoconsole = $1 WHERE cpf = $2",
-                [Number(cliente.tempoconsole || 0) + Number(pacote.tempoconsole), cpf]
+                [Number(cliente.tempoconsole || 0) + Number(pacote.tempoconsole) * 60, cpf]
             );
         }
 
         if (pacote.temposimulador) {
             await client.query(
                 "UPDATE cliente SET temposimulador = $1 WHERE cpf = $2",
-                [Number(cliente.temposimulador || 0) + Number(pacote.temposimulador), cpf]
+                [Number(cliente.temposimulador || 0) + Number(pacote.temposimulador) * 60, cpf]
             );
         }
 
