@@ -51,11 +51,11 @@ yarn --version
 Crie um arquivo `.env` na pasta `api/` com a seguinte configuração:
 
 ```env
-DATABASE_URL=postgresql://usuario:senha@localhost:5432/nome_do_banco
+DATABASE_URL=postgresql://usuario:senha@servidor:porta/nome_do_banco
 PORT=8080
 ```
 
-Substitua `usuario`, `senha` e `nome_do_banco` pelas suas credenciais do PostgreSQL.
+Substitua `usuario`, `senha`, `servidor`, `porta` e `nome_do_banco` pelas suas credenciais do PostgreSQL.
 
 ### 2. Instalar Dependências
 
